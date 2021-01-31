@@ -50,4 +50,4 @@ alias o="xdg-open"
 # Update applications and CLTs.
 
 alias u="sudo apt update \
-            && sudo apt upgrade \
+            && sudo apt upgrade
