@@ -179,6 +179,8 @@ Output for `git log`:
 License
 -------
 
+Forked from https://github.com/alrra/dotfiles
+
 The code is available under the [MIT license][license].
 
 <!-- Link labels: -->
