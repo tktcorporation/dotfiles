@@ -51,5 +51,3 @@ alias o="xdg-open"
 
 alias u="sudo apt update \
             && sudo apt upgrade \
-            && npm install -g npm \
-            && npm upgrade -g"
