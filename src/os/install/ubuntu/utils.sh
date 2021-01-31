@@ -17,6 +17,10 @@ add_ppa() {
     sudo add-apt-repository -y ppa:"$1" &> /dev/null
 }
 
+add_repo() {
+    sudo add-apt-repository "$1" &> /dev/null
+}
+
 add_to_source_list() {
     sudo sh -c "printf 'deb $1' >> '/etc/apt/sources.list.d/$2'"
 }
@@ -71,4 +75,9 @@ upgrade() {
             && sudo apt -o Dpkg::Options::=\"--force-confnew\" upgrade -qqy" \
         "APT (upgrade)"
 
+}
+
+add_usermod() {
+    execute
+        "sudo usermod -aG "$1" ${USER}"
 }
