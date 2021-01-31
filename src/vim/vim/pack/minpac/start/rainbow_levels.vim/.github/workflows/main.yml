@@ -19,7 +19,7 @@ jobs:
         python-version: '2.7'
 
     - name: Install dependencies
-      run: sudo apt-get -y install vim && pip install covimerage
+      run: sudo apt -y install vim && pip install covimerage
 
     - name: Install vader.vim
       run: git clone https://github.com/junegunn/vader.vim.git ./vader.vim

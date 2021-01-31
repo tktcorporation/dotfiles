@@ -27,7 +27,7 @@ autoremove() {
     # dependencies for other packages and are no longer needed.
 
     execute \
-        "sudo apt-get autoremove -qqy" \
+        "sudo apt autoremove -qqy" \
         "APT (autoremove)"
 
 }
@@ -39,9 +39,9 @@ install_package() {
     declare -r PACKAGE_READABLE_NAME="$1"
 
     if ! package_is_installed "$PACKAGE"; then
-        execute "sudo apt-get install --allow-unauthenticated -qqy $EXTRA_ARGUMENTS $PACKAGE" "$PACKAGE_READABLE_NAME"
-        #                                      suppress output ─┘│
-        #            assume "yes" as the answer to all prompts ──┘
+        execute "sudo apt install --allow-unauthenticated -qqy $EXTRA_ARGUMENTS $PACKAGE" "$PACKAGE_READABLE_NAME"
+        #                                  suppress output ─┘│
+        #        assume "yes" as the answer to all prompts ──┘
     else
         print_success "$PACKAGE_READABLE_NAME"
     fi
@@ -57,7 +57,7 @@ update() {
     # Resynchronize the package index files from their sources.
 
     execute \
-        "sudo apt-get update -qqy" \
+        "sudo apt update -qqy" \
         "APT (update)"
 
 }
@@ -68,7 +68,7 @@ upgrade() {
 
     execute \
         "export DEBIAN_FRONTEND=\"noninteractive\" \
-            && sudo apt-get -o Dpkg::Options::=\"--force-confnew\" upgrade -qqy" \
+            && sudo apt -o Dpkg::Options::=\"--force-confnew\" upgrade -qqy" \
         "APT (upgrade)"
 
 }
