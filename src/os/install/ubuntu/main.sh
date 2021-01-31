@@ -21,5 +21,7 @@ upgrade
 # ./../npm.sh
 ./tmux.sh
 ./../vim.sh
+./fish.sh
+./docker.sh
 
 ./cleanup.sh
