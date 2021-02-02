@@ -259,7 +259,7 @@
 
 [init]
 
-    defaultBranch = main
+    defaultBranch = master
 
 [pretty]
 
