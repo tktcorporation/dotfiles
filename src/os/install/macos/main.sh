@@ -11,6 +11,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 ./bash.sh
 
 ./git.sh
+./docker.sh
+./fish.sh
 ./../nvm.sh
 ./browsers.sh
 ./compression_tools.sh
