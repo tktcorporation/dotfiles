@@ -25,5 +25,6 @@ upgrade
 # ./../npm.sh
 ./tmux.sh
 ./../vim.sh
+./one-password.sh
 
 ./cleanup.sh
