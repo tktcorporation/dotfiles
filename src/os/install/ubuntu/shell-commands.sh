@@ -12,8 +12,8 @@ print_in_purple "\n   Shell Commands\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_fzf() {
-    execute "git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf"
-    execute "~/.fzf/install"
+    execute "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
+    execute "$HOME/.fzf/install"
 }
 
 main() {
