@@ -37,11 +37,8 @@ main() {
     print_in_purple "\n   Fish\n\n"
 
     install_fish
-    opt_out_of_analytics
-
-    brew_update
-    brew_upgrade
-
+    install_fisher
+    install_fisher_plugin
 }
 
 main

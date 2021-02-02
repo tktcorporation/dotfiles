@@ -13,6 +13,7 @@ upgrade
 
 ./git.sh
 # ./../nvm.sh
+./shell-commands.sh
 ./fish.sh
 ./docker.sh
 ./browsers.sh
