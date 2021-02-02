@@ -14,14 +14,14 @@ main() {
 
     if ! package_is_installed "docker-ce"; then
 
-    add_key "https://download.docker.com/linux/ubuntu/gpg" \
-        || print_error "Docker (add key)"
+        add_key "https://download.docker.com/linux/ubuntu/gpg" \
+            || print_error "Docker (add key)"
 
-        add_repo "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" \
-        || print_error "Docker (add Repository)"
+            add_repo "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" \
+            || print_error "Docker (add Repository)"
 
-    update &> /dev/null \
-        || print_error "Docker (resync package index files)"
+        update &> /dev/null \
+            || print_error "Docker (resync package index files)"
 
     fi
 
