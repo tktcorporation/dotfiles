@@ -15,6 +15,7 @@ upgrade
 # ./../nvm.sh
 ./shell-commands.sh
 ./fish.sh
+./fisher-commands.sh
 ./docker.sh
 ./browsers.sh
 ./compression_tools.sh
