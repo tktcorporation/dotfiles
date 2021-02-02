@@ -23,8 +23,9 @@ main() {
             || print_error "1Password (add key)"
 
         add_to_source_list \
-            "[arch=amd64 signed-by=/usr/share/keyrings/1password.gpg] https://downloads.1password.com/linux/debian edge main \
-                1password.list" \
+            "[arch=amd64 signed-by=/usr/share/keyrings/1password.gpg] \
+                https://downloads.1password.com/linux/debian edge main" \
+            "1password.list" \
             || print_error "1Password (add Repository)"
 
         update &> /dev/null \
