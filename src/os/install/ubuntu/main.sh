@@ -13,6 +13,8 @@ upgrade
 
 ./git.sh
 # ./../nvm.sh
+./fish.sh
+./docker.sh
 ./browsers.sh
 ./compression_tools.sh
 # ./image_tools.sh
@@ -21,7 +23,5 @@ upgrade
 # ./../npm.sh
 ./tmux.sh
 ./../vim.sh
-./fish.sh
-./docker.sh
 
 ./cleanup.sh
