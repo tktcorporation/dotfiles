@@ -22,7 +22,9 @@ main() {
                 --recv-keys 3FEF9748469ADBE15DA7CA80AC2D62742012EA22" \
             || print_error "1Password (add key)"
 
-        add_repo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password.gpg] https://downloads.1password.com/linux/debian edge main" \
+        add_to_source_list \
+            "[arch=amd64 signed-by=/usr/share/keyrings/1password.gpg] https://downloads.1password.com/linux/debian edge main \
+                1password.list" \
             || print_error "1Password (add Repository)"
 
         update &> /dev/null \
