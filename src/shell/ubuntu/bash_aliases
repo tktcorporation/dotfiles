@@ -13,8 +13,7 @@ alias afk="gnome-screensaver-command --lock"
 alias apti="sudo apt install"
 alias aptr="sudo apt remove"
 alias apts="sudo apt-cache search"
-alias aptu="sudo apt update \
-                && sudo apt upgrade"
+alias aptu="sudo apt update && sudo apt upgrade"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -49,5 +48,4 @@ alias o="xdg-open"
 
 # Update applications and CLTs.
 
-alias u="sudo apt update \
-            && sudo apt upgrade
+alias u="sudo apt update && sudo apt upgrade"
