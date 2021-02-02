@@ -19,7 +19,7 @@ install_fisher_plugins() {
 }
 
 main() {
-    install_fisher_plugin
+    install_fisher_plugins
 }
 
 main
