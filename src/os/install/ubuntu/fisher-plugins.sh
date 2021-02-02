@@ -12,10 +12,9 @@ print_in_purple "\n   Fisher\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_fisher_plugins() {
-    execute \
-        "fish -c \"fisher install decors/fish-ghq \
-        && fisher install jethrokuan/fzf \
-        && fisher install jethrokuan/zz\""
+    execute "fish -c \"fisher install decors/fish-ghq\""
+    execute "fish -c \"fisher install jethrokuan/fzf\""
+    execute "fish -c \"fisher install jethrokuan/zz\""
 }
 
 main() {
