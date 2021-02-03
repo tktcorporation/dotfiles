@@ -40,8 +40,6 @@ alias q="exit"
 alias t="tmux"
 alias y="yarn"
 
-make -C "${HOME}/.Bash2FishAliasesSync" sync; and source ~/.config/fish/b2f_aliases.fish
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Load OS specific configs.
