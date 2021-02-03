@@ -13,4 +13,4 @@ set -g theme_display_cmd_duration no  # コマンド実行時間の非表示
 # ----------
 # bash aliases
 # ----------
-make -C "{$HOME}/.Bash2FishAliasesSync" sync _B2F_BASHRC="{$HOME}/.bash_aliases"; and source ~/.config/fish/b2f_aliases.fish
+make -C "$HOME/.Bash2FishAliasesSync" sync _B2F_BASHRC="$HOME/.bash_aliases"; and source ~/.config/fish/b2f_aliases.fish
