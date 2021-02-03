@@ -7,6 +7,6 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 
 print_in_purple "\n   Shell\n\n"
 
-execute "chsh -s $(which fish)" \
+execute "sudo chsh $USER chsh -s $(which fish)" \
     "Change default shell to fish"
 
