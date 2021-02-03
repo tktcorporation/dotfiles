@@ -1,3 +1,7 @@
-## Add exec permissions
+# Commands Util
 
-- `find . -name "*.sh" | xargs chmod +x`
+## Add executable permissions
+
+```bash
+find . -name "*.sh" | xargs chmod +x
+``
