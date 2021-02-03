@@ -7,7 +7,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 
 print_in_purple "\n   Terminal\n\n"
 
-execute "gsettings set org.gnome.desktop.interface monospace-font-name 'Monospace 12'" \
+execute "gsettings set org.gnome.desktop.interface monospace-font-name 'Monospace 18'" \
     "Change font size"
 
 execute "./set_terminal_theme.sh" \
