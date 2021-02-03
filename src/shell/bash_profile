@@ -51,6 +51,11 @@ source_bash_files
 unset -f source_bash_files
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# sync alias to fish
+
+make -C "${HOME}/.Bash2FishAliasesSync" sync _B2F_BASHRC="${HOME}/.bash_aliases"; and source ~/.config/fish/b2f_aliases.fish
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Clear system messages (system copyright notice, the date
 # and time of the last login, the message of the day, etc.).
