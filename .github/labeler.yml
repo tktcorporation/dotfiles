@@ -1,0 +1,12 @@
+document:
+  - README.md
+ci:
+  - .github/**/*
+macos:
+  - src/os/install/macos/**/*
+  - src/os/preferences/macos/**/*
+  - src/shell/macos/**/*
+ubuntu:
+  - src/os/install/ubuntu/**/*
+  - src/os/preferences/ubuntu/**/*
+  - src/shell/ubuntu/**/*
