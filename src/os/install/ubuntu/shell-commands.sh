@@ -14,7 +14,7 @@ print_in_purple "\n   Shell Commands\n\n"
 install_fzf() {
     execute \
         "rm -rf $HOME/.fzf" \
-        "Remove an old package (fzf)"
+        "Remove an old package (fzf)" \
         || print_error "fzf (remove an old package)"
     execute \
         "git clone  --quiet --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf" \
