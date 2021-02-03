@@ -79,5 +79,6 @@ upgrade() {
 
 add_usermod() {
     execute \
-        "sudo usermod -aG $1 ${USER}"
+        "sudo usermod -aG $1 ${USER}" \
+        "Add ${USER} to $1 (usermod)"
 }

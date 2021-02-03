@@ -20,6 +20,7 @@ main() {
                 --keyring /usr/share/keyrings/1password.gpg \
                 adv --keyserver keyserver.ubuntu.com \
                 --recv-keys 3FEF9748469ADBE15DA7CA80AC2D62742012EA22" \
+            "Add the key for the 1Password apt repository" \
             || print_error "1Password (add key)"
 
         add_to_source_list \
