@@ -13,11 +13,13 @@ print_in_purple "\n   Shell Commands\n\n"
 
 install_fzf() {
     execute \
-        "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf" \
-        "Download fzf"
+        "git clone  --quiet --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf" \
+        "Download fzf" \
+        || print_error "fzf (git clone)"
     execute \
         "$HOME/.fzf/install" \
-        "Install fzf"
+        "Install fzf" \
+        || print_error "fzf (install)"
 }
 
 main() {
