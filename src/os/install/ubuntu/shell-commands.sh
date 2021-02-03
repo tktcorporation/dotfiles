@@ -11,6 +11,13 @@ print_in_purple "\n   Shell Commands\n\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+install_Bash2FishAliasesSync() {
+    execute \
+        "git clone  --quiet --depth 1 https://github.com/d0riven/Bash2FishAliasesSync.git $HOME/.Bash2FishAliasesSync" \
+        "Download Bash2FishAliasesSync" \
+        || print_error "Bash2FishAliasesSync (git clone)"
+}
+
 install_fzf() {
     execute \
         "rm -rf $HOME/.fzf" \
@@ -27,6 +34,7 @@ install_fzf() {
 }
 
 main() {
+    install_Bash2FishAliasesSync
     install_fzf
 }
 
