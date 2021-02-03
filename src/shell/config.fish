@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # ----------
 # bobthefish config
 # ----------
