@@ -11,24 +11,33 @@ print_in_purple "\n   Shell Commands\n\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+declare bash_to_fish_file_name=".Bash2FishAliasesSync"
+declare fzf_file_name=".fzf"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 install_Bash2FishAliasesSync() {
     execute \
-        "git clone  --quiet --depth 1 https://github.com/d0riven/Bash2FishAliasesSync.git $HOME/.Bash2FishAliasesSync" \
+        "rm -rf $HOME/$bash_to_fish_file_name" \
+        "Remove an old package (Bash2FishAliasesSync)" \
+        || print_error "Bash2FishAliasesSync (remove an old package)"
+    execute \
+        "git clone  --quiet --depth 1 https://github.com/d0riven/Bash2FishAliasesSync.git $HOME/$bash_to_fish_file_name" \
         "Download Bash2FishAliasesSync" \
         || print_error "Bash2FishAliasesSync (git clone)"
 }
 
 install_fzf() {
     execute \
-        "rm -rf $HOME/.fzf" \
+        "rm -rf $HOME/$fzf_file_name" \
         "Remove an old package (fzf)" \
         || print_error "fzf (remove an old package)"
     execute \
-        "git clone  --quiet --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf" \
+        "git clone  --quiet --depth 1 https://github.com/junegunn/fzf.git $HOME/$fzf_file_name" \
         "Download fzf" \
         || print_error "fzf (git clone)"
     execute \
-        "$HOME/.fzf/install" \
+        "$HOME/$fzf_file_name/install" \
         "Install fzf" \
         || print_error "fzf (install)"
 }
