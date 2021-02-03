@@ -13,8 +13,8 @@ upgrade
 
 ./git.sh
 # ./../nvm.sh
-./shell-commands.sh
 ./fish.sh
+./shell-commands.sh
 ./fisher-plugins.sh
 ./docker.sh
 ./browsers.sh
