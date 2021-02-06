@@ -28,6 +28,13 @@ alias gcd='cd $(ghq root)/$(ghq list | fzf)'
 
 
 # ----------
+# direnv
+# ----------
+set -x EDITOR code
+eval (direnv hook fish)
+
+
+# ----------
 # bash aliases
 # ----------
 make -C "$HOME/.Bash2FishAliasesSync" sync _B2F_BASHRC="$HOME/.bash_aliases"; and source ~/.config/fish/b2f_aliases.fish
