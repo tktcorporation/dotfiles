@@ -1,3 +1,5 @@
+# shellcheck disable=SC2148
+
 set -x GOPATH "$HOME"/go
 set -x PATH "$PATH" "$GOPATH"/bin
 
