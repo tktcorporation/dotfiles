@@ -59,6 +59,22 @@ install_package() {
 
 }
 
+install_dep_package() {
+
+    declare -r EXTRA_ARGUMENTS="$3"
+    declare -r PACKAGE="$2"
+    declare -r PACKAGE_READABLE_NAME="$1"
+
+    if ! package_is_installed "$PACKAGE"; then
+        execute \
+            "sudo apt install -qy $EXTRA_ARGUMENTS $PACKAGE" \
+            "$PACKAGE_READABLE_NAME"
+    else
+        print_success "$PACKAGE_READABLE_NAME"
+    fi
+
+}
+
 install_dep() {
     declare -r EXTRA_ARGUMENTS="$4"
     declare -r PACKAGE="${3}.dep"
@@ -68,7 +84,7 @@ install_dep() {
     w_get "$PACKAGE" "$DEP_URL" \
         || print_error "install_$PACKAGE (wget)"
 
-    install_package "$PACKAGE_READABLE_NAME" "./$PACKAGE" "$EXTRA_ARGUMENTS"
+    install_dep_package "$PACKAGE_READABLE_NAME" "./$PACKAGE" "$EXTRA_ARGUMENTS"
 }
 
 package_is_installed() {
