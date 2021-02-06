@@ -13,7 +13,7 @@ upgrade
 
 ./git.sh
 # ./../nvm.sh
-./golang
+./langages.sh
 ./fish.sh
 ./shell-commands.sh
 ./fisher-plugins.sh
