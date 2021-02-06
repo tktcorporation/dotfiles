@@ -67,8 +67,10 @@ install_dep_package() {
 
     if ! package_is_installed "$PACKAGE"; then
         execute \
-            "sudo apt install -qy $EXTRA_ARGUMENTS $PACKAGE" \
+            "sudo dpkg -i $PACKAGE" \
             "$PACKAGE_READABLE_NAME"
+             &> /dev/null
+            || print_error "install_$PACKAGE (dpkg)"
     else
         print_success "$PACKAGE_READABLE_NAME"
     fi
