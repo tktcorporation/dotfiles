@@ -27,5 +27,6 @@ upgrade
 ./tmux.sh
 ./../vim.sh
 ./one-password.sh
+./github-cli.sh
 
 ./cleanup.sh
