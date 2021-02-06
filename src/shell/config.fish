@@ -1,5 +1,5 @@
-set -x GOPATH $HOME/go
-set -x PATH $PATH $GOPATH/bin
+set -x GOPATH "$HOME"/go
+set -x PATH "$PATH" "$GOPATH"/bin
 
 # ----------
 # bobthefish config
