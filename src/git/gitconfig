@@ -291,6 +291,9 @@
     #
     # See also: https://github.com/tktcorporation/dotfiles#gitconfiglocal
 
+[ghq]
+    root = ~/src
+
 [include]
 
     # Load local configs.
