@@ -69,7 +69,6 @@ install_dep_package() {
         execute \
             "sudo dpkg -i $PACKAGE" \
             "$PACKAGE_READABLE_NAME" \
-             &> /dev/null \
             || print_error "install_$PACKAGE (dpkg)"
     else
         print_success "$PACKAGE_READABLE_NAME"
