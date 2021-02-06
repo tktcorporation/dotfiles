@@ -6,7 +6,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 w_get() {
-    wget "$1" &> /dev/null
+    wget -q "$1" &> /dev/null
 }
 
 add_key() {
