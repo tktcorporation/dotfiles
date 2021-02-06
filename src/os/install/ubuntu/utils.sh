@@ -56,6 +56,18 @@ install_package() {
 
 }
 
+install_dep() {
+    declare -r EXTRA_ARGUMENTS="$4"
+    declare -r PACKAGE="$3"
+    declare -r PACKAGE_READABLE_NAME="$2"
+    declare -r DEP_URL="$1"
+
+    w_get "-O $PACKAGE $DEP_URL" \
+        || print_error "install_$PACKAGE (wget)"
+
+    install_package "$PACKAGE_READABLE_NAME" "./$PACKAGE" "$EXTRA_ARGUMENTS"
+}
+
 package_is_installed() {
     dpkg -s "$1" &> /dev/null
 }
