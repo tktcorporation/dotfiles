@@ -6,7 +6,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 w_get() {
-    wget -q "$1" &> /dev/null
+    declare -r URL="$2"
+    declare -r PACKAGE_NAME="$1"
+
+    wget -qO "$PACKAGE_NAME" "$URL" &> /dev/null
 }
 
 add_key() {
@@ -58,11 +61,11 @@ install_package() {
 
 install_dep() {
     declare -r EXTRA_ARGUMENTS="$4"
-    declare -r PACKAGE="$3"
+    declare -r PACKAGE="${3}.dep"
     declare -r PACKAGE_READABLE_NAME="$2"
     declare -r DEP_URL="$1"
 
-    w_get "-O $PACKAGE $DEP_URL" \
+    w_get "$PACKAGE" "$DEP_URL" \
         || print_error "install_$PACKAGE (wget)"
 
     install_package "$PACKAGE_READABLE_NAME" "./$PACKAGE" "$EXTRA_ARGUMENTS"
