@@ -49,10 +49,18 @@ install_ghq() {
         || print_error "ghq (go get)"
 }
 
+install_direnv() {
+    execute \
+        "go get github.com/direnv/direnv" \
+        "Install direnv" \
+        || print_error "direnv (go get)"
+}
+
 main() {
     install_Bash2FishAliasesSync
     install_fzf
     install_ghq
+    install_direnv
 }
 
 main

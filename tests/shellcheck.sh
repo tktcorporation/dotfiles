@@ -19,6 +19,7 @@ main() {
         -type f \
         ! -path '../src/shell/curlrc' \
         ! -path '../src/shell/inputrc' \
+        ! -path '../src/shell/config.fish' \
         ! -path '../src/os/preferences/macos/*.applescript' \
         ! -path '../src/os/preferences/macos/*.terminal' \
         -exec shellcheck \
