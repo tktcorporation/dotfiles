@@ -5,6 +5,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")" \
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+w_get() {
+    wget "$1" &> /dev/null
+}
+
 add_key() {
 
     wget -qO - "$1" | sudo apt-key add - &> /dev/null
