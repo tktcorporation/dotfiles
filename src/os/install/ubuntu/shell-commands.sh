@@ -42,9 +42,17 @@ install_fzf() {
         || print_error "fzf (install)"
 }
 
+install_ghq() {
+    execute \
+        "go get github.com/motemen/ghq" \
+        "Install ghq" \
+        || print_error "ghq (go get)"
+}
+
 main() {
     install_Bash2FishAliasesSync
     install_fzf
+    install_ghq
 }
 
 main
