@@ -14,6 +14,20 @@ set -g theme_display_date no  # 時刻を表示しないように設定
 set -g theme_display_cmd_duration no  # コマンド実行時間の非表示
 
 # ----------
+# aliases
+# ----------
+
+# 現在の作業リポジトリをブラウザで表示する
+alias ghr='gh repo view'
+
+# リポジトリの一覧の中からブラウザで表示したい対象を検索・表示する
+alias ghrl='gh repo view $(ghq list | fzf | cut -d "/" -f 2,3)'
+
+# リポジトリのディレクトリへ移動
+alias gcd='cd $(ghq root)/$(ghq list | fzf)'
+
+
+# ----------
 # bash aliases
 # ----------
 make -C "$HOME/.Bash2FishAliasesSync" sync _B2F_BASHRC="$HOME/.bash_aliases"; and source ~/.config/fish/b2f_aliases.fish
