@@ -29,5 +29,6 @@ upgrade
 ./one-password.sh
 ./github-cli.sh
 ./git-kraken.sh
+./vscode.sh
 
 ./cleanup.sh
