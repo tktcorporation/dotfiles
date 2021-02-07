@@ -11,4 +11,3 @@ print_in_purple "\n   IME\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_package "Ibus-Mozc" "ibus-mozc"
-install_package "Langpacks-Ja" "langpacks-ja"
