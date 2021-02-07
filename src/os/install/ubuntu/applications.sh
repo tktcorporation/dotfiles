@@ -20,6 +20,10 @@ install_dep \
     "VSCodeInsider" \
     "code-insider"
 
+install_package \
+    "Discord dependencies" \
+    "libgconf-2-4 libc++1"
+
 install_dep \
     "https://dl.discordapp.net/apps/linux/0.0.13/discord-0.0.13.deb" \
     "Discord" \
