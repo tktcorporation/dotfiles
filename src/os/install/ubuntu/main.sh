@@ -28,6 +28,7 @@ upgrade
 ./../vim.sh
 ./one-password.sh
 ./github-cli.sh
+./copyq.sh
 ./applications.sh
 ./ime.sh
 
