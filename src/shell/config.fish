@@ -26,6 +26,9 @@ alias ghrl="gh repo view (ghq list | fzf | cut -d "/" -f 2,3)"
 # リポジトリのディレクトリへ移動
 alias gcd="cd (ghq root)/(ghq list | fzf)"
 
+# aws cli
+alias aws "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION amazon/aws-cli"
+
 
 # ----------
 # direnv
