@@ -28,6 +28,8 @@ main() {
     install_package "Docker" "docker-ce"
 
     add_usermod "docker"
+
+    install_package "DockerCompose" "docker-compose"
 }
 
 main
