@@ -33,7 +33,7 @@ alias aws "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACCESS_
 # ----------
 # direnv
 # ----------
-set -x EDITOR code
+set -x EDITOR code-insiders
 eval (direnv hook fish)
 
 
