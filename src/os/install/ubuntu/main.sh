@@ -30,5 +30,6 @@ upgrade
 ./github-cli.sh
 ./git-kraken.sh
 ./vscode.sh
+./ime.sh
 
 ./cleanup.sh
