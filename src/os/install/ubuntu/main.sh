@@ -28,8 +28,7 @@ upgrade
 ./../vim.sh
 ./one-password.sh
 ./github-cli.sh
-./git-kraken.sh
-./vscode.sh
+./applications.sh
 ./ime.sh
 
 ./cleanup.sh
