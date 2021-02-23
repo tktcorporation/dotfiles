@@ -10,6 +10,24 @@ print_in_purple "\n   Dep Applications\n\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+table_plus() {
+
+    if ! package_is_installed "tableplus"; then
+
+        add_key "http://deb.tableplus.com/apt.tableplus.com.gpg.key" \
+            || print_error "TablePlus (add key)"
+
+        add_repo "deb [arch=amd64] https://deb.tableplus.com/debian tableplus main" \
+            || print_error "TablePlus (add Repository)"
+
+        update &> /dev/null \
+            || print_error "TablePlus (resync package index files)"
+
+    fi
+
+    install_package "TablePlus" "tableplus"
+}
+
 install_dep \
     "https://release.gitkraken.com/linux/gitkraken-amd64.deb" \
     "GitKraken" \
