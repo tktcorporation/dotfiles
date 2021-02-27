@@ -51,7 +51,7 @@ install_ghq() {
 
 install_direnv() {
     execute \
-        "go get github.com/direnv/direnv" \
+        "go get -u github.com/direnv/direnv" \
         "Install direnv" \
         || print_error "direnv (go get)"
 }
