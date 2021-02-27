@@ -205,10 +205,10 @@
 
     # Delete merged branches on remote and local
 
-    delete-merged-branch = "!f() {
-        PROTECT_BRANCHES=\"master|development|develop|dev|trunk|main\"; \
+    delete-merged-branch = "!f() { \
+        protected_branches=\"master|development|develop|dev|trunk|main\"; \
         git fetch --prune; \
-        git branch --merged | egrep -v "\*|${PROTECT_BRANCHES}" | xargs git branch -d; \
+        git branch --merged | egrep -v \"\\*|${protected_branches}\" | xargs git branch -d; \
     }; f"
 
 [color "branch"]
