@@ -201,6 +201,16 @@
 
     w = instaweb --httpd=webrick
 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    # Delete merged branches on remote and local
+
+    delete-merged-branch = "!f() {
+        PROTECT_BRANCHES=\"master|development|develop|dev|trunk|main\"; \
+        git fetch --prune; \
+        git branch --merged | egrep -v "\*|${PROTECT_BRANCHES}" | xargs git branch -d; \
+    }; f"
+
 [color "branch"]
 
     current = green bold
