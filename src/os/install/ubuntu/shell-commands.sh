@@ -44,7 +44,7 @@ install_fzf() {
 
 install_ghq() {
     execute \
-        "go get -u github.com/motemen/ghq" \
+        "go get -u github.com/x-motemen/ghq" \
         "Install ghq" \
         || print_error "ghq (go get)"
 }
