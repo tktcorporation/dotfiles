@@ -56,11 +56,19 @@ install_direnv() {
         || print_error "direnv (go get)"
 }
 
+install_git_remind() {
+    execute \
+        "go get -u github.com/suin/git-remind" \
+        "Install git-remind" \
+        || print_error "git-remind (go get)"
+}
+
 main() {
     install_Bash2FishAliasesSync
     install_fzf
     install_ghq
     install_direnv
+    install_git_remind
 }
 
 main

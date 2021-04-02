@@ -304,6 +304,9 @@
 [ghq]
     root = ~/src
 
+[remind]
+    paths = ~/src/*
+
 [include]
 
     # Load local configs.
