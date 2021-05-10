@@ -2,6 +2,7 @@
 
 set -x GOPATH "$HOME"/go
 set -x PATH "$PATH" "$GOPATH"/bin
+set -x PATH ~/Android/Sdk/platform-tools $PATH
 
 # ----------
 # bobthefish config
