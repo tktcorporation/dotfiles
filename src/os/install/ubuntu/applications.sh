@@ -28,6 +28,20 @@ install_table_plus() {
     install_package "TablePlus" "tableplus"
 }
 
+install_postman() {
+    execute \
+        "snap install postman" \
+        "Install postman" \
+        || print_error "postman (snap install)"
+}
+
+install_jetbrains_toolbox() {
+    execute \
+        "curl -fsSL https://raw.githubusercontent.com/nagygergo/jetbrains-toolbox-install/master/jetbrains-toolbox.sh | bash" \
+        "Install jetbrains-toolbox" \
+        || print_error "jetbrains-toolbox"
+}
+
 main() {
     install_dep \
     "https://release.gitkraken.com/linux/gitkraken-amd64.deb" \
@@ -54,6 +68,10 @@ main() {
         "slack"
 
     install_table_plus
+
+    install_postman
+
+    install_jetbrains_toolbox
 }
 
 main
