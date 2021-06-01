@@ -22,4 +22,6 @@ fi
 
 install_package "Go" "golang-go"
 
+install_package "Rust" "rustc"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
