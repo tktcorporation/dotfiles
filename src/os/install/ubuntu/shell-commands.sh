@@ -63,12 +63,30 @@ install_git_remind() {
         || print_error "git-remind (go get)"
 }
 
+install_zoxide() {
+    execute \
+        "cargo install zoxide" \
+        "Install zoxide" \
+        || print_error "zoxide (cargo install)"
+}
+
+install_jq() {
+    if ! package_is_installed "jq"; then
+
+        print_error "jq (package is not installed)"
+
+    fi
+
+    install_package "jq" "jq"
+}
+
 main() {
     install_Bash2FishAliasesSync
     install_fzf
     install_ghq
     install_direnv
     install_git_remind
+    install_zoxide
 }
 
 main

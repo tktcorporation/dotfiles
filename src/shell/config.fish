@@ -3,6 +3,7 @@
 set -x GOPATH "$HOME"/go
 set -x PATH "$PATH" "$GOPATH"/bin
 set -x PATH ~/Android/Sdk/platform-tools $PATH
+set -x PATH ~/.cargo/bin $PATH
 
 # ----------
 # bobthefish config
@@ -41,6 +42,11 @@ alias amplify "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACC
 # ----------
 set -x EDITOR code-insiders
 eval (direnv hook fish)
+
+# ----------
+# zoxide
+# ----------
+zoxide init fish | source
 
 
 # ----------
