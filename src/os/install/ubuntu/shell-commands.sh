@@ -70,6 +70,20 @@ install_zoxide() {
         || print_error "zoxide (cargo install)"
 }
 
+install_bat() {
+    execute \
+        "cargo install bat" \
+        "Install bat" \
+        || print_error "bat (cargo install)"
+}
+
+install_ripgrep() {
+    execute \
+        "cargo install ripgrep" \
+        "Install ripgrep" \
+        || print_error "ripgrep (cargo install)"
+}
+
 install_jq() {
     if ! package_is_installed "jq"; then
 
@@ -87,6 +101,9 @@ main() {
     install_direnv
     install_git_remind
     install_zoxide
+    install_bat
+    install_ripgrep
+    install_jq
 }
 
 main
