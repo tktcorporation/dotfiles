@@ -10,21 +10,37 @@ print_in_purple "\n   GithubCLI\n\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-if ! package_is_installed "gh"; then
+install_githubcli() {
+    if ! package_is_installed "gh"; then
+        execute \
+            "sudo apt-key adv \
+                --keyserver keyserver.ubuntu.com \
+                --recv-key C99B11DEB97541F0" \
+            &> /dev/null \
+            || print_error "Github CLI (add key)"
 
+        add_repo "https://cli.github.com/packages" \
+            || print_error "Github CLI (add to package resource list)"
+
+        update &> /dev/null \
+            || print_error "Github CLI (resync package index files)"
+
+    fi
+
+    install_package "Github CLI" "gh"
+}
+
+install_extensions() {
     execute \
-        "sudo apt-key adv \
-            --keyserver keyserver.ubuntu.com \
-            --recv-key C99B11DEB97541F0" \
-        &> /dev/null \
-        || print_error "Github CLI (add key)"
+        "gh extension install mislav/gh-branch" \
+        "gh-branch"
+}
 
-    add_repo "https://cli.github.com/packages" \
-        || print_error "Github CLI (add to package resource list)"
+main() {
+    install_githubcli
 
-    update &> /dev/null \
-        || print_error "Github CLI (resync package index files)"
+    print_in_purple "\n   Extensions\n\n"
+    install_extensions
+}
 
-fi
-
-install_package "Github CLI" "gh"
+main
