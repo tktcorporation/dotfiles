@@ -53,6 +53,11 @@ main() {
         "VSCodeInsider" \
         "code-insider"
 
+    install_dep \
+        "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64" \
+        "VSCode" \
+        "code"
+
     install_package \
         "Discord dependencies" \
         "libgconf-2-4 libc++1"
