@@ -210,6 +210,7 @@
         git fetch --prune; \
         git branch --merged | egrep -v \"\\*|${protected_branches}\" | xargs git branch -d; \
     }; f"
+	showpr = "!f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
 
 [color "branch"]
 
@@ -294,6 +295,8 @@
     # https://github.com/git/git/blob/90f7b16b3adc78d4bbabbd426fb69aa78c714f71/Documentation/config.txt#L2847-L2855
 
     useConfigOnly = true
+	email = tktcorporation.go@gmail.com
+	name = tktcorporation
 
     # [!] DO NOT store sensitive information such as the Git user
     # credentials (`name` / `email`), or things such as the `signingkey`
