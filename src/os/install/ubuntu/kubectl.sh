@@ -11,7 +11,7 @@ print_in_purple "\n   kubectl\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_kubectl() {
-    if ! package_is_installed "gh"; then
+    if ! package_is_installed "kubectl"; then
         execute \
             "sudo apt-get install -y \
                 apt-transport-https \
