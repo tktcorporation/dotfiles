@@ -57,6 +57,7 @@ eval (nodenv init -)
 
 # ----------
 # zoxide
+# (available zi: cd with interactive selection (using fzf))
 # ----------
 zoxide init fish | source
 
