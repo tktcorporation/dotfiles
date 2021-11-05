@@ -47,7 +47,7 @@ alias rmcontainers "docker rm (docker ps -q -a) && docker stop (docker ps -q)"
 # ----------
 # direnv
 # ----------
-set -x EDITOR code-insiders
+set -x EDITOR code
 eval (direnv hook fish)
 
 # ----------
