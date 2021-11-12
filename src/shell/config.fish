@@ -42,7 +42,7 @@ alias amplify "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACC
 # alias kubectl "echo \"run with docker...\" && docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -v ~/.kube:/root/.kube -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION -e KUBECONFIG bitnami/kubectl:1.20.9"
 
 # stop and rm all containers
-alias rmcontainers "docker rm (docker ps -q -a) && docker stop (docker ps -q)"
+alias rmcontainers "docker stop (docker ps -q) && docker rm (docker ps -q -a)"
 
 # ----------
 # direnv
