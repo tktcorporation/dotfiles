@@ -239,16 +239,21 @@
     remindd = "!f() { \
         RED=\"\\033[0;31m\"; \
         YERROW=\"\\033[1;33m\"; \
+        GREEN=\"\\033[0;32m\"; \
         NC=\"\\033[0m\"; \
         exists_uncommited=$(git status -suno); \
         if [ -n \"$exists_uncommited\" ]; then \
             echo \"${YERROW}Need to commit${NC}: HEAD\"; \
         fi; \
-        git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | while read -r line ; do \
+        exists_unpushed=$(git log --branches --not --remotes --simplify-by-decoration --decorate --oneline); \
+        echo \"$exists_unpushed\" | awk 'NF' | while read line; do \
             branch_with=$(echo $line | awk '{print $2}'); \
             branch=$(echo $branch_with | sed 's/^.//' | sed 's/.$//'); \
             echo \"${RED}Need to push${NC}: $branch\"; \
         done; \
+        if [ -z \"$exists_unpushed\" ]; then \
+            echo \"${GREEN}All is up to date!!${NC}\"; \
+        fi; \
     }; f"
     remind-all-a = "!f() { \
         repos=\"$(ghq list -p)\"; \
