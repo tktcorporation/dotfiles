@@ -223,13 +223,31 @@
     remind-all = "!f() { \
         repos=\"$(ghq list -p)\"; \
         RED=\"\\033[0;31m\"; \
+        YERROW=\"\\033[1;33m\"; \
         NC=\"\\033[0m\"; \
         for repo in $repos; do \
-            git-remind --path \"$repo\" status; \
             exists_unpushed=$(git -C \"$repo\" log --branches --not --remotes --simplify-by-decoration --decorate --oneline); \
             if [ -n \"$exists_unpushed\" ]; then \
                 echo \"${RED}Need to push${NC}: $repo\"; \
             fi; \
+            exists_uncommited=$(git -C \"$repo\" status -suno); \
+            if [ -n \"$exists_uncommited\" ]; then \
+                echo \"${YERROW}Need to commit${NC}: $repo\"; \
+            fi; \
+        done; \
+    }; f"
+    remindd = "!f() { \
+        RED=\"\\033[0;31m\"; \
+        YERROW=\"\\033[1;33m\"; \
+        NC=\"\\033[0m\"; \
+        exists_uncommited=$(git status -suno); \
+        if [ -n \"$exists_uncommited\" ]; then \
+            echo \"${YERROW}Need to commit${NC}: HEAD\"; \
+        fi; \
+        git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | while read -r line ; do \
+            branch_with=$(echo $line | awk '{print $2}'); \
+            branch=$(echo $branch_with | sed 's/^.//' | sed 's/.$//'); \
+            echo \"${RED}Need to push${NC}: $branch\"; \
         done; \
     }; f"
     remind-all-a = "!f() { \
