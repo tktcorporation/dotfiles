@@ -268,6 +268,8 @@
             echo \"$removed_first_and_last_characters\"; \
         done; \
     }; f"
+    remind-switch = "!f() { git remindd | fzf | awk '{print $4}' | xargs git switch; }; f"
+    remind-all-cd = "!f() { cd $(git remind-all | fzf | awk '{print $4}'); }; f"
 	showpr = "!f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
 
 [color "branch"]
