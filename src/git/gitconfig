@@ -210,6 +210,41 @@
         git fetch --prune; \
         git branch --merged | egrep -v \"\\*|${protected_branches}\" | xargs git branch -d; \
     }; f"
+    delete-current-branch = "!f() { \
+        name=$(git symbolic-ref --short HEAD); \
+        default_branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p'); \
+        if [ \"$name\" = \"$default_branch\" ]; then \
+            echo \"You cant delete the default branch\"; \
+        else \
+            git checkout \"$default_branch\"; \
+            git branch -D \"$name\"; \
+        fi; \
+    }; f"
+    remind-all = "!f() { \
+        repos=\"$(ghq list -p)\"; \
+        RED=\"\\033[0;31m\"; \
+        NC=\"\\033[0m\"; \
+        for repo in $repos; do \
+            git-remind --path \"$repo\" status; \
+            exists_unpushed=$(git -C \"$repo\" log --branches --not --remotes --simplify-by-decoration --decorate --oneline); \
+            if [ -n \"$exists_unpushed\" ]; then \
+                echo \"${RED}Need to push${NC}: $repo\"; \
+            fi; \
+        done; \
+    }; f"
+    remind-all-a = "!f() { \
+        repos=\"$(ghq list -p)\"; \
+        for repo in $repos; do \
+            git-remind --path \"$repo\" status -a; \
+        done; \
+    }; f"
+    unpushed-branches = "!f() { \
+        git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | while read -r line ; do \
+            branch=$(echo $line | awk '{print $2}'); \
+            removed_first_and_last_characters=$(echo $branch | sed 's/^.//' | sed 's/.$//'); \
+            echo \"$removed_first_and_last_characters\"; \
+        done; \
+    }; f"
 	showpr = "!f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
 
 [color "branch"]
