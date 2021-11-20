@@ -150,6 +150,7 @@ verify_os() {
 
     declare -r MINIMUM_MACOS_VERSION="10.10"
     declare -r MINIMUM_UBUNTU_VERSION="20.04"
+    declare -r MINIMUM_NEON_VERSION="20.04"
 
     local os_name="$(get_os)"
     local os_version="$(get_os_version)"
@@ -178,6 +179,19 @@ verify_os() {
             return 0
         else
             printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
+        fi
+    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    # Check if the OS is `KDE neon` and
+    # it's above the required version.
+
+    elif [ "$os_name" == "neon" ]; then
+
+        if is_supported_version "$os_version" "$MINIMUM_NEON_VERSION"; then
+            return 0
+        else
+            printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_NEON_VERSION"
         fi
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
