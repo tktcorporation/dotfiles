@@ -179,7 +179,7 @@ verify_os() {
         else
             printf "Sorry, this script is intended only for Ubuntu %s+" "$MINIMUM_UBUNTU_VERSION"
         fi
-
+    
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     else
