@@ -30,10 +30,10 @@ alias ghrl="gh repo view (ghq list | fzf | cut -d "/" -f 2,3)"
 alias gcd="cd (ghq root)/(ghq list | fzf)"
 
 # push, commit していないリポジトリを列挙
-git remind --path '/home/tktcorporation/src/github.com/tktcorporation/*' --path '/home/tktcorporation/src/github.com/tkt-actions/*' --path '/home/tktcorporation/src/github.com/lapras-inc/*' status
+alias git-remind-cd "cd (git remind-all | fzf | awk '{print $4}')"
 
 # aws cli
-alias aws "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION amazon/aws-cli"
+# alias aws "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION amazon/aws-cli"
 
 # amplify
 alias amplify "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION tktcorporation/amplify"
