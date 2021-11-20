@@ -132,6 +132,11 @@ get_os() {
         os="$kernelName"
     fi
 
+    # handle KDE neon as Ubuntu
+    if [ "$os" == "neon" ]; then
+        os="ubuntu"
+    fi
+
     printf "%s" "$os"
 
 }
