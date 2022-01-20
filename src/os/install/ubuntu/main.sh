@@ -11,6 +11,7 @@ upgrade
 
 ./build-essentials.sh
 
+./brew.sh
 ./git.sh
 # ./../nvm.sh
 ./langages.sh
