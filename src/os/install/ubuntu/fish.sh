@@ -26,12 +26,24 @@ install_fisher() {
         "Fisher"
 }
 
+install_zsh() {
+    if ! package_is_installed "zsh"; then
+
+        print_error "zsh (package is not installed)"
+
+    fi
+
+    install_package "zsh" "zsh"
+}
+
 main() {
 
     print_in_purple "\n   Fish\n\n"
 
     install_fish
     install_fisher
+
+    install_zsh
 }
 
 main
