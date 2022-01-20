@@ -34,6 +34,10 @@ install_extensions() {
     execute \
         "gh extension install mislav/gh-branch" \
         "gh-branch"
+    
+    execute \
+        "gh extension install davidraviv/gh-clean-branches" \
+        "gh-clean-branches"
 }
 
 main() {
