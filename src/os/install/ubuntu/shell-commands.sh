@@ -94,6 +94,13 @@ install_jq() {
     install_package "jq" "jq"
 }
 
+install_tldr() {
+    execute \
+        "brew install tldr" \
+        "Install tldr" \
+        || print_error "tldr (brew install)"
+}
+
 main() {
     install_Bash2FishAliasesSync
     install_fzf
@@ -104,6 +111,7 @@ main() {
     install_bat
     install_ripgrep
     install_jq
+    install_tldr
 }
 
 main
