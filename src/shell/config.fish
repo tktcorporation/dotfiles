@@ -44,6 +44,8 @@ alias amplify "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACC
 # stop and rm all containers
 alias rmcontainers "docker stop (docker ps -q) && docker rm (docker ps -q -a)"
 
+alias pbcopy='xsel --clipboard --input'
+
 # ----------
 # direnv
 # ----------
