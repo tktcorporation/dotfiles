@@ -41,6 +41,9 @@ alias amplify "docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -e AWS_ACC
 # kubectl
 # alias kubectl "echo \"run with docker...\" && docker run --rm -it -v ~/.aws:/root/.aws -v (pwd):/aws -v ~/.kube:/root/.kube -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION -e KUBECONFIG bitnami/kubectl:1.20.9"
 
+# redasql
+alias redasql "docker run --rm -it -e REDASQL_REDASH_APIKEY -e REDASQL_REDASH_ENDPOINT -e REDASQL_HTTP_PROXY tktcorporation/redasql-docker"
+
 # stop and rm all containers
 alias rmcontainers "docker stop (docker ps -q) && docker rm (docker ps -q -a)"
 
