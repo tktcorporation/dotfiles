@@ -11,29 +11,15 @@ print_in_purple "\n   Shell\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_fish() {
-    if ! package_is_installed "fish"; then
-
-        print_error "Fish (package is not installed)"
-
-    fi
-
-    install_package "Fish" "fish"
+    execute "brew install fish"
 }
 
 install_fisher() {
-    execute \
-        "curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish" \
-        "Fisher"
+    execute "brew install fisher"
 }
 
 install_zsh() {
-    if ! package_is_installed "zsh"; then
-
-        print_error "zsh (package is not installed)"
-
-    fi
-
-    install_package "zsh" "zsh"
+    execute "brew install zsh"
 }
 
 main() {
