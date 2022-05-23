@@ -11,7 +11,7 @@ print_in_purple "\n   kubectl\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 main() {
-    execute "brew install kubectl"
+    brew_install "kubectl" "kubernetes-cli/kubectl"
 }
 
 main

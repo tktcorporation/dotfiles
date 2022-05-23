@@ -10,18 +10,7 @@ print_in_purple "\n   Langages\n\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-if ! package_is_installed "golang-go"; then
-
-    add_ppa "longsleep/golang-backports" \
-        || print_error "Go (add PPA)"
-
-    update &> /dev/null \
-        || print_error "Go (resync package index files)"
-
-fi
-
-install_package "Go" "golang-go"
-
-install_package "Rust" "rustc"
+brew_install "Go" "go"
+brew_install "Rust" "rust"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

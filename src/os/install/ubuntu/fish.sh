@@ -11,25 +11,24 @@ print_in_purple "\n   Shell\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_fish() {
-    execute "brew install fish"
+    brew_install "Fish" "fish"
 }
 
 install_fisher() {
-    execute "brew install fisher"
+    brew_install "Fisher" "fisher"
 }
 
 install_zsh() {
-    execute "brew install zsh"
+    brew_install "Zsh" "zsh"
 }
 
 main() {
+    install_zsh
 
     print_in_purple "\n   Fish\n\n"
 
     install_fish
     install_fisher
-
-    install_zsh
 }
 
 main

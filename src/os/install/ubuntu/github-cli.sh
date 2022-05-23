@@ -11,10 +11,7 @@ print_in_purple "\n   GithubCLI\n\n"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 install_githubcli() {
-    execute \
-        "brew install gh" \
-        "Install Github CLI(gh)" \
-        || print_error "gh (brew install)"
+    brew_install "GithubCLI" "github/gh/gh"
 }
 
 install_extensions() {
