@@ -12,3 +12,7 @@ execute "gsettings set org.gnome.desktop.background picture-options 'stretched'"
 
 execute "gsettings set org.gnome.libgnomekbd.keyboard layouts \"[ 'us', 'ro' ]\"" \
     "Set keyboard languages"
+
+# keyboard layouts settings for kde
+execute "gsettings set org.kde.kdecoration2 color-scheme 'dark'" \
+    "Set kde color scheme"
