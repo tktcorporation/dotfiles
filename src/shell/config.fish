@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x GOPATH "$HOME"/go
-set -x PATH "$PATH" "$GOPATH"/bin
 set -x PATH ~/Android/Sdk/platform-tools $PATH
 set -x PATH ~/.cargo/bin $PATH
 set -Ux PATH $HOME/.nodenv/bin $PATH
