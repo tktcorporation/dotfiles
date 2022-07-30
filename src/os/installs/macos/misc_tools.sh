@@ -13,3 +13,10 @@ brew_install "ShellCheck" "shellcheck"
 if [ -d "$HOME/.nvm" ]; then
     brew_install "Yarn" "yarn"
 fi
+
+brew_install "GHQ" "ghq"
+brew_install "FZF" "fzf"
+brew_install "ClamAV" "clamav"
+brew_install "Tldr" "tldr"
+brew_install "jq" "jq"
+brew_install "direnv" "direnv"
