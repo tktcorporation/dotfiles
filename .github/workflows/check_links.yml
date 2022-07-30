@@ -6,25 +6,18 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 jobs:
-  macOS:
-    runs-on: macos-latest
+  ubuntu:
+    runs-on: ubuntu-latest
     steps:
 
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: brew install shellcheck
-
-      - name: Lint shell files
-        run: ./tests/lint_shell_files.sh
-
-      - name: Lint Markdown files
-        run: ./tests/lint_markdown_files.sh
-
-      - name: Check links from Markdown file
+      - name: Check links
         run: ./tests/check_links_from_markdown_files.sh
 
-name: macOS
+name: Check links
 
-on: push
+on:
+  schedule:
+    - cron: "0 0 * * SAT"
