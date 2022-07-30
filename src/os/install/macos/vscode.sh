@@ -16,13 +16,3 @@ print_in_purple "\n   Visual Studio Code\n\n"                                :
 
 # Install VSCode
 brew_install "Visual Studio Code" "visual-studio-code" "--cask"
-
-printf "\n"
-
-# Install the VSCode plugins
-install_plugin "MarkdownLint" "DavidAnson.vscode-markdownlint"
-install_plugin "EditorConfig" "EditorConfig.EditorConfig"
-install_plugin "Vim" "vscodevim.vim"
-
-# Close VSCode
-osascript -e 'quit app "Visual Studio Code"'
