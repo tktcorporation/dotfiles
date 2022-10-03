@@ -44,18 +44,12 @@ install_jetbrains_toolbox() {
 
 main() {
     install_dep \
-    "https://release.gitkraken.com/linux/gitkraken-amd64.deb" \
-    "GitKraken" \
-    "gitkraken"
+        "https://release.gitkraken.com/linux/gitkraken-amd64.deb" \
+        "GitKraken" \
+        "gitkraken"
 
-    install_dep \
-        "https://update.code.visualstudio.com/latest/linux-deb-x64/insider" \
-        "VSCodeInsider" \
-        "code-insider"
-
-    install_dep \
-        "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64" \
-        "VSCode" \
+    install_package \
+        "VS Code" \
         "code"
 
     install_package \
