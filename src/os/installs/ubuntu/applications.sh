@@ -10,31 +10,6 @@ print_in_purple "\n   Dep Applications\n\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-install_table_plus() {
-
-    if ! package_is_installed "tableplus"; then
-
-        add_key "http://deb.tableplus.com/apt.tableplus.com.gpg.key" \
-            || print_error "TablePlus (add key)"
-
-        add_repo "deb [arch=amd64] https://deb.tableplus.com/debian tableplus main" \
-            || print_error "TablePlus (add Repository)"
-
-        update &> /dev/null \
-            || print_error "TablePlus (resync package index files)"
-
-    fi
-
-    install_package "TablePlus" "tableplus"
-}
-
-install_postman() {
-    execute \
-        "snap install postman" \
-        "Install postman" \
-        || print_error "postman (snap install)"
-}
-
 install_jetbrains_toolbox() {
     execute \
         "curl -fsSL https://raw.githubusercontent.com/nagygergo/jetbrains-toolbox-install/master/jetbrains-toolbox.sh | bash" \
@@ -66,11 +41,6 @@ main() {
         "Slack" \
         "slack"
 
-    install_table_plus
-
-    install_postman
-
-    install_jetbrains_toolbox
 }
 
 main
