@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 
 declare -r GITHUB_REPOSITORY="tktcorporation/dotfiles"
 
