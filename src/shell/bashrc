@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 
 [ -n "$PS1" ] \
     && . "$HOME/.bash_profile"

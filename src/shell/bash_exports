@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 
 # Bash Variables.
 # https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html

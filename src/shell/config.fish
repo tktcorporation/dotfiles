@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 
 set -x PATH ~/Android/Sdk/platform-tools $PATH
 set -x PATH ~/.cargo/bin $PATH

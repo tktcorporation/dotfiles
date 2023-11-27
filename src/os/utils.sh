@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 
 answer_is_yes() {
     [[ "$REPLY" =~ ^[Yy]$ ]] \

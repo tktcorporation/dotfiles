@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 
 cd "$(dirname "${BASH_SOURCE[0]}")" \
     && . "./check_markdown_files.sh"

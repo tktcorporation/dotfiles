@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 set -e
 
 cd "$(dirname "${BASH_SOURCE[0]}")" \

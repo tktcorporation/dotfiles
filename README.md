@@ -102,6 +102,7 @@ Here is an example:
 
 ```shell
 #!/bin/bash
+set -eux
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
