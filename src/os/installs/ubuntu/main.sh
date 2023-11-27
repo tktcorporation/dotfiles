@@ -12,23 +12,17 @@ upgrade
 ./build-essentials.sh
 
 ./brew.sh
+./github-cli.sh
 ./git.sh
-# ./../nvm.sh
 ./langages.sh
-./fish.sh
+# ./fish.sh
 ./shell-commands.sh
 ./fisher-plugins.sh
 ./docker.sh
 ./browsers.sh
-./compression_tools.sh
-# ./image_tools.sh
 ./misc.sh
 ./misc_tools.sh
-# ./../npm.sh
-./tmux.sh
-./../vim.sh
 ./one-password.sh
-./github-cli.sh
 ./kubectl.sh
 ./copyq.sh
 ./applications.sh
