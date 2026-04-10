@@ -1,0 +1,26 @@
+# History
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt share_history
+setopt hist_ignore_all_dups
+setopt hist_ignore_space
+
+# Completion
+autoload -Uz compinit && compinit
+
+# Tools
+eval "$(zoxide init zsh)"
+eval "$(direnv hook zsh)"
+source <(fzf --zsh)
+
+# Aliases
+alias g="git"
+alias ll="eza -l"
+alias la="eza -la"
+alias cat="bat --plain"
+alias gcd='cd $(ghq root)/$(ghq list | fzf)'
+alias ghr='gh repo view --web'
+
+# Editor
+export EDITOR="code"

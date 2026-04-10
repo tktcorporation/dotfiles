@@ -1,0 +1,100 @@
+[user]
+    name = {{ .name }}
+    email = {{ .email }}
+    useConfigOnly = true
+{{- if ne .signingkey "" }}
+    signingkey = {{ .signingkey }}
+{{- end }}
+
+{{- if ne .signingkey "" }}
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+{{- if eq .chezmoi.os "darwin" }}
+    program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+{{- else }}
+    program = /opt/1Password/op-ssh-sign
+{{- end }}
+
+[commit]
+    gpgsign = true
+{{- end }}
+
+[init]
+    defaultBranch = main
+
+[core]
+    excludesFile = ~/.gitignore_global
+
+[alias]
+    delete-merged-branch = "!f() { \
+        protected_branches=\"master|development|develop|dev|trunk|main\"; \
+        git fetch --prune; \
+        git branch --merged | egrep -v \"\\*|${protected_branches}\" | xargs git branch -d; \
+    }; f"
+    delete-current-branch = "!f() { \
+        name=$(git symbolic-ref --short HEAD); \
+        default_branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p'); \
+        if [ \"$name\" = \"$default_branch\" ]; then \
+            echo \"You cant delete the default branch\"; \
+        else \
+            git checkout \"$default_branch\"; \
+            git branch -D \"$name\"; \
+        fi; \
+    }; f"
+    remind-all = "!f() { \
+        repos=\"$(ghq list -p)\"; \
+        RED=\"\\033[0;31m\"; \
+        YERROW=\"\\033[1;33m\"; \
+        NC=\"\\033[0m\"; \
+        for repo in $repos; do \
+            exists_unpushed=$(git -C \"$repo\" log --branches --not --remotes --simplify-by-decoration --decorate --oneline); \
+            if [ -n \"$exists_unpushed\" ]; then \
+                echo \"${RED}Need to push${NC}: $repo\"; \
+            fi; \
+            exists_uncommited=$(git -C \"$repo\" status -suno); \
+            if [ -n \"$exists_uncommited\" ]; then \
+                echo \"${YERROW}Need to commit${NC}: $repo\"; \
+            fi; \
+        done; \
+    }; f"
+    remindd = "!f() { \
+        RED=\"\\033[0;31m\"; \
+        YERROW=\"\\033[1;33m\"; \
+        GREEN=\"\\033[0;32m\"; \
+        NC=\"\\033[0m\"; \
+        exists_uncommited=$(git status -suno); \
+        if [ -n \"$exists_uncommited\" ]; then \
+            echo \"${YERROW}Need to commit${NC}: HEAD\"; \
+        fi; \
+        exists_unpushed=$(git log --branches --not --remotes --simplify-by-decoration --decorate --oneline); \
+        echo \"$exists_unpushed\" | awk 'NF' | while read line; do \
+            branch_with=$(echo $line | awk '{print $2}'); \
+            branch=$(echo $branch_with | sed 's/^.//' | sed 's/.$//'); \
+            echo \"${RED}Need to push${NC}: $branch\"; \
+        done; \
+        if [ -z \"$exists_unpushed\" ]; then \
+            echo \"${GREEN}All is up to date!!${NC}\"; \
+        fi; \
+    }; f"
+    unpushed-branches = "!f() { \
+        git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | while read -r line ; do \
+            branch=$(echo $line | awk '{print $2}'); \
+            removed_first_and_last_characters=$(echo $branch | sed 's/^.//' | sed 's/.$//'); \
+            echo \"$removed_first_and_last_characters\"; \
+        done; \
+    }; f"
+    remind-switch = "!f() { git remindd | fzf | awk '{print $4}' | xargs git switch; }; f"
+    remind-all-cd = "!f() { cd $(git remind-all | fzf | awk '{print $4}'); }; f"
+    showpr = "!f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
+
+[pretty]
+    custom = "%C(magenta)%h%C(red)%d %C(yellow)%ar %C(green)%s %C(yellow)(%an)"
+
+[ghq]
+    root = ~/src
+
+[include]
+    path = ~/.gitconfig.local
