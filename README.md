@@ -4,18 +4,22 @@
 
 ## Setup
 
-### 新しいマシン (ワンライナー)
-
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
 ```
 
-初回実行時に以下を聞かれます:
+これだけで以下が全て完了します:
 
-- **Git user name** / **Git email address** — gitconfig に設定
-- **SSH public key for commit signing** — 1Password SSH signing に使う公開鍵 (空欄でスキップ)
+1. **chezmoi** インストール
+2. **Homebrew** インストール (未導入の場合)
+3. **Brewfile** の全パッケージインストール (gh, ghq, fzf, direnv, zoxide, 1password-cli, ...)
+4. **~/.gitconfig** 展開 (name/email/signing key をプロンプトで設定)
+5. **~/.gitignore_global** 展開
+6. **~/.zprofile** 展開 (Homebrew PATH)
+7. **~/.zshrc** 展開 (zoxide, direnv, fzf, ghq/fzf aliases)
+8. **~/.ssh/config** 展開 (1Password SSH agent)
 
-### 既にセットアップ済みの場合
+### 更新
 
 ```bash
 chezmoi update
@@ -24,11 +28,13 @@ chezmoi update
 ## 構成
 
 ```
-.chezmoi.yaml.tmpl                          # chezmoi 設定 (初回プロンプト定義)
-.chezmoiignore                              # chezmoi が HOME にコピーしないファイル
-Brewfile                                    # brew bundle で管理するパッケージ
-dot_gitconfig.tmpl                          # ~/.gitconfig
-dot_gitignore_global                        # ~/.gitignore_global
+.chezmoi.yaml.tmpl                           # chezmoi 設定 (初回プロンプト定義)
+Brewfile                                     # brew bundle で管理するパッケージ
+dot_gitconfig.tmpl                           # ~/.gitconfig (aliases + 1Password signing)
+dot_gitignore_global                         # ~/.gitignore_global
+dot_zprofile.tmpl                            # ~/.zprofile (Homebrew PATH)
+dot_zshrc                                    # ~/.zshrc (tool init + aliases)
+private_dot_ssh/private_config.tmpl          # ~/.ssh/config (1Password SSH agent)
 run_onchange_before_install-packages.sh.tmpl # Brewfile 変更時に自動で brew bundle
 ```
 
@@ -36,43 +42,14 @@ run_onchange_before_install-packages.sh.tmpl # Brewfile 変更時に自動で br
 
 `Brewfile` を編集して `chezmoi apply` すると自動で `brew bundle` が走ります.
 
-```bash
-# Brewfile にパッケージを追加した後
-chezmoi apply
-```
-
 ## 1Password 連携
 
-### SSH commit signing
+- **SSH agent**: `~/.ssh/config` に OS に応じた `IdentityAgent` を自動設定
+- **commit signing**: 初回セットアップ時に SSH 公開鍵を入力すると `op-ssh-sign` 経由の署名を自動設定 (空欄でスキップ可)
 
-`chezmoi init` 時に SSH 公開鍵を入力すると、gitconfig に以下が自動設定されます:
+## ローカル上書き
 
-- `gpg.format = ssh`
-- `gpg.ssh.program` — OS に応じた `op-ssh-sign` のパス
-- `commit.gpgsign = true`
-
-### SSH agent
-
-1Password アプリの設定で SSH agent を有効にし、`~/.ssh/config` に以下を追加:
-
-```ssh-config
-# macOS
-Host *
-    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-
-# Linux
-Host *
-    IdentityAgent ~/.1password/agent.sock
-```
-
-## ローカル設定
-
-`~/.gitconfig.local` で gitconfig をマシン固有に上書きできます:
-
-```gitconfig
-[user]
-    signingKey = ssh-ed25519 AAAA...
-```
+`~/.gitconfig.local` でマシン固有の設定を追加できます.
 
 ## License
 
