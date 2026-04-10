@@ -1,1 +1,2 @@
 **/*.dep
+.chezmoi.yaml

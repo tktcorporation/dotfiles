@@ -1,6 +1,34 @@
-[alias]
-    # Delete merged branches on remote and local
+[user]
+    name = {{ .name }}
+    email = {{ .email }}
+    useConfigOnly = true
+{{- if ne .signingkey "" }}
+    signingkey = {{ .signingkey }}
+{{- end }}
 
+{{- if ne .signingkey "" }}
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+{{- if eq .chezmoi.os "darwin" }}
+    program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+{{- else }}
+    program = /opt/1Password/op-ssh-sign
+{{- end }}
+
+[commit]
+    gpgsign = true
+{{- end }}
+
+[init]
+    defaultBranch = main
+
+[core]
+    excludesFile = ~/.gitignore_global
+
+[alias]
     delete-merged-branch = "!f() { \
         protected_branches=\"master|development|develop|dev|trunk|main\"; \
         git fetch --prune; \
@@ -51,12 +79,6 @@
             echo \"${GREEN}All is up to date!!${NC}\"; \
         fi; \
     }; f"
-    remind-all-a = "!f() { \
-        repos=\"$(ghq list -p)\"; \
-        for repo in $repos; do \
-            git-remind --path \"$repo\" status -a; \
-        done; \
-    }; f"
     unpushed-branches = "!f() { \
         git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | while read -r line ; do \
             branch=$(echo $line | awk '{print $2}'); \
@@ -66,49 +88,13 @@
     }; f"
     remind-switch = "!f() { git remindd | fzf | awk '{print $4}' | xargs git switch; }; f"
     remind-all-cd = "!f() { cd $(git remind-all | fzf | awk '{print $4}'); }; f"
-	showpr = "!f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
-
-[init]
-
-    defaultBranch = main
+    showpr = "!f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
 
 [pretty]
-
     custom = "%C(magenta)%h%C(red)%d %C(yellow)%ar %C(green)%s %C(yellow)(%an)"
-    #                     │        │            │            │             └─ author name
-    #                     │        │            │            └─ message
-    #                     │        │            └─ date (relative)
-    #                     │        └─ decorations (branch, heads or tags)
-    #                     └─ hash (abbreviated)
-
-[user]
-
-    # Do not guess the user's identity.
-    # https://github.com/git/git/blob/90f7b16b3adc78d4bbabbd426fb69aa78c714f71/Documentation/config.txt#L2847-L2855
-
-    useConfigOnly = true
-	email = tktcorporation.go@gmail.com
-	name = tktcorporation
-
-    # [!] DO NOT store sensitive information such as the Git user
-    # credentials (`name` / `email`), or things such as the `signingkey`
-    # in this file, add them in `~/.gitconfig.local`!
-    #
-    # See also: https://github.com/tktcorporation/dotfiles#gitconfiglocal
 
 [ghq]
     root = ~/src
 
-[remind]
-    paths = ~/src/*
-
 [include]
-
-    # Load local configs.
-    # https://git-scm.com/docs/git-config#_includes
-    #
-    # [!] The following needs to remain at the end of this file in
-    #     order to allow any of the above configs to be overwritten
-    #     by the local ones
-
     path = ~/.gitconfig.local
