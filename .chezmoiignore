@@ -1,6 +1,7 @@
 Brewfile
 README.md
 LICENSE.txt
+setup.sh
 .editorconfig
 .github
 .gitignore

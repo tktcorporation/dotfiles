@@ -5,12 +5,24 @@
 ## Setup
 
 ```bash
-# Xcode Command Line Tools (新しい Mac では必須)
-xcode-select --install
+bash <(curl -fsLS https://raw.githubusercontent.com/tktcorporation/dotfiles/main/setup.sh)
+```
 
-# dotfiles セットアップ
+Xcode Command Line Tools のインストール待ちから chezmoi の init/apply まで自動で行います.
+
+<details>
+<summary>手動で実行する場合</summary>
+
+```bash
+# 1. Xcode Command Line Tools をインストールし、GUI ダイアログ完了を待つ
+xcode-select --install
+# ダイアログで「インストール」→ 完了を待ってから次へ
+
+# 2. chezmoi で dotfiles をセットアップ
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
 ```
+
+</details>
 
 これだけで以下が全て完了します:
 
