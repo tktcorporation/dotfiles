@@ -19,4 +19,4 @@ if ! command -v brew &>/dev/null; then
 fi
 
 echo "Running brew bundle..."
-brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }} --no-lock
+brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
