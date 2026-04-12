@@ -5,6 +5,10 @@
 ## Setup
 
 ```bash
+# Xcode Command Line Tools (新しい Mac では必須)
+xcode-select --install
+
+# dotfiles セットアップ
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
 ```
 
