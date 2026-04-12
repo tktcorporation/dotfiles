@@ -1,0 +1,21 @@
+#!/bin/bash
+{{ if eq .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+# ─── Dock ───
+defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock mru-spaces -bool false
+defaults write com.apple.dock show-recents -bool false
+
+# ─── Finder ───
+defaults write com.apple.finder AppleShowAllExtensions -bool true
+defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
+defaults write com.apple.finder ShowPathbar -bool true
+defaults write com.apple.finder ShowStatusBar -bool true
+
+# ─── Keyboard ───
+defaults write NSGlobalDomain InitialKeyRepeat -int 25
+defaults write NSGlobalDomain KeyRepeat -int 2
+
+killall Dock Finder 2>/dev/null || true
+{{ end -}}

@@ -8,3 +8,6 @@ eval "$(/usr/local/bin/brew shellenv)"
 {{- else }}
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{- end }}
+
+# OrbStack shell integration (if installed)
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :
