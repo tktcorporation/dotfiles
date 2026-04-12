@@ -1,6 +1,25 @@
-{{- $name := promptStringOnce . "name" "Git user name" -}}
-{{- $email := promptStringOnce . "email" "Git email address" -}}
-{{- $signingkey := promptStringOnce . "signingkey" "SSH public key for commit signing (leave empty to skip)" -}}
+{{- /* ─── Git config profile ─── */ -}}
+{{- $profile := promptChoiceOnce . "profile" "Git config profile" (list "personal (tktcorporation <tktcorporation.go@gmail.com>)" "manual") -}}
+
+{{- $name := "" -}}
+{{- $email := "" -}}
+{{- if hasPrefix "personal" $profile -}}
+{{-   $name = "tktcorporation" -}}
+{{-   $email = "tktcorporation.go@gmail.com" -}}
+{{- else -}}
+{{-   $name = promptStringOnce . "name" "Git user name" -}}
+{{-   $email = promptStringOnce . "email" "Git email address" -}}
+{{- end -}}
+
+{{- /* ─── SSH signing key from 1Password ─── */ -}}
+{{- $signingkey := "" -}}
+{{- $detectedKey := output "sh" "-c" "op item get 'Github SSHキー' --account my.1password.com --fields public_key 2>/dev/null || true" | trim -}}
+{{- if $detectedKey -}}
+{{-   $useKey := promptBoolOnce . "useDetectedKey" (printf "Use this SSH key for commit signing?\n  %s" $detectedKey) -}}
+{{-   if $useKey -}}
+{{-     $signingkey = $detectedKey -}}
+{{-   end -}}
+{{- end -}}
 
 data:
   name: {{ $name | quote }}
