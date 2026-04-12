@@ -1,6 +1,8 @@
 {{- $name := promptStringOnce . "name" "Git user name" -}}
 {{- $email := promptStringOnce . "email" "Git email address" -}}
-{{- $signingkey := promptStringOnce . "signingkey" "SSH public key for commit signing (leave empty to skip)" -}}
+
+{{- /* Auto-fetch SSH public key from 1Password if signed in, otherwise empty */ -}}
+{{- $signingkey := output "sh" "-c" "op item get 'Github SSHキー' --account my.1password.com --fields public_key 2>/dev/null || true" | trim -}}
 
 data:
   name: {{ $name | quote }}
