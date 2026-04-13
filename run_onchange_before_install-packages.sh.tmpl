@@ -8,12 +8,14 @@ set -euo pipefail
 # パスワードを求められるのを防ぐため、最初に1回だけ認証し
 # バックグラウンドでタイムスタンプを更新し続ける。
 # パターンは Homebrew install.sh / mathiasbynens/dotfiles を参考。
-echo "==> Administrator password required for package installation."
-sudo -v
-while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
-SUDO_KEEPALIVE_PID=$!
-# スクリプト終了時にバックグラウンドプロセスを確実に停止する
-trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
+# sudo が存在しない環境（Linuxbrew を非 root で使う場合等）ではスキップする。
+if command -v sudo &>/dev/null; then
+    echo "==> Administrator password required for package installation."
+    sudo -v
+    while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+    SUDO_KEEPALIVE_PID=$!
+    trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
+fi
 
 # Install Homebrew if not present
 if ! command -v brew &>/dev/null; then
