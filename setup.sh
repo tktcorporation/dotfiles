@@ -6,10 +6,8 @@ echo "==> dotfiles setup"
 # ── sudo keepalive ──────────────────────────────────────────────
 # セットアップ中に何度もパスワードを求められるのを防ぐため、
 # 最初に1回だけ認証しバックグラウンドでタイムスタンプを更新し続ける。
-# sudo が存在しない環境ではスキップする。
-if command -v sudo &>/dev/null; then
-    echo "==> Administrator password required for setup."
-    sudo -v
+# sudo が存在しない環境や、sudoers に入っていない環境ではスキップする。
+if command -v sudo &>/dev/null && sudo -v 2>/dev/null; then
     while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
     SUDO_KEEPALIVE_PID=$!
     trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
