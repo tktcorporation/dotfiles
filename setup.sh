@@ -3,6 +3,15 @@ set -euo pipefail
 
 echo "==> dotfiles setup"
 
+# ── sudo keepalive ──────────────────────────────────────────────
+# セットアップ中に何度もパスワードを求められるのを防ぐため、
+# 最初に1回だけ認証しバックグラウンドでタイムスタンプを更新し続ける。
+echo "==> Administrator password required for setup."
+sudo -v
+while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
+
 # ── Xcode Command Line Tools ────────────────────────────────────
 if ! xcode-select -p &>/dev/null; then
     echo "==> Installing Xcode Command Line Tools..."
