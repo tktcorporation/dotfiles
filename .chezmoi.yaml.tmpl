@@ -1,9 +1,12 @@
 {{- /* ─── Git config profile ─── */ -}}
-{{- $profile := promptChoiceOnce . "profile" "Git config profile" (list "personal (tktcorporation <tktcorporation.go@gmail.com>)" "manual") -}}
+{{- /* 選択肢を短いキーワードにして、何を入力すればいいか明確にする。
+       "Once" により初回のみプロンプトが表示され、以降はキャッシュされる。
+       再選択したい場合は chezmoi init --prompt を使う。 */ -}}
+{{- $profile := promptChoiceOnce . "profile" "Git config profile (personal: tktcorporation <tktcorporation.go@gmail.com>, manual: enter your own)" (list "personal" "manual") -}}
 
 {{- $name := "" -}}
 {{- $email := "" -}}
-{{- if hasPrefix "personal" $profile -}}
+{{- if eq $profile "personal" -}}
 {{-   $name = "tktcorporation" -}}
 {{-   $email = "tktcorporation.go@gmail.com" -}}
 {{- else -}}
