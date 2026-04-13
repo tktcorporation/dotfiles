@@ -1,0 +1,80 @@
+name: Validate
+
+on:
+  pull_request:
+    paths:
+      - Brewfile
+      - .chezmoi.yaml.tmpl
+      - "*.tmpl"
+      - "dot_*"
+      - "private_dot_*"
+      - "run_*"
+
+jobs:
+  brewfile:
+    name: Validate Brewfile
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check formulae exist
+        run: |
+          errors=0
+          while IFS= read -r formula; do
+            if ! brew info "$formula" &>/dev/null; then
+              echo "::error::Formula not found: $formula"
+              errors=$((errors + 1))
+            fi
+          done < <(grep '^\s*brew "' Brewfile | sed 's/.*brew "\([^"]*\)".*/\1/')
+
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors formula(e) not found in Homebrew"
+            exit 1
+          fi
+          echo "All formulae validated"
+
+      - name: Check casks exist
+        run: |
+          errors=0
+          while IFS= read -r cask; do
+            if ! brew info --cask "$cask" &>/dev/null; then
+              echo "::error::Cask not found: $cask"
+              errors=$((errors + 1))
+            fi
+          done < <(grep '^\s*cask "' Brewfile | sed 's/.*cask "\([^"]*\)".*/\1/')
+
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors cask(s) not found in Homebrew"
+            exit 1
+          fi
+          echo "All casks validated"
+
+  chezmoi:
+    name: Validate chezmoi templates
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        run: brew install chezmoi
+
+      - name: Validate templates parse
+        run: |
+          errors=0
+          for f in $(find . -name '*.tmpl' -not -path './.git/*'); do
+            # Test that chezmoi can parse the template (with dummy data)
+            if ! chezmoi execute-template --init \
+              --promptBool false \
+              --promptChoice "personal (tktcorporation <tktcorporation.go@gmail.com>)" \
+              --promptString "dummy" \
+              < "$f" &>/dev/null; then
+              echo "::error::Template parse error: $f"
+              errors=$((errors + 1))
+            fi
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors template(s) failed to parse"
+            exit 1
+          fi
+          echo "All templates validated"
