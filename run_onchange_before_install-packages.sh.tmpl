@@ -3,6 +3,19 @@ set -euo pipefail
 
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
 
+# ── sudo keepalive ──────────────────────────────────────────────
+# Homebrew のインストールや cask のインストール時に何度も
+# パスワードを求められるのを防ぐため、最初に1回だけ認証し
+# バックグラウンドでタイムスタンプを更新し続ける。
+# パターンは Homebrew install.sh / mathiasbynens/dotfiles を参考。
+# sudo が存在しない環境や、sudoers に入っていない環境
+# （Linuxbrew 非 root、CI コンテナ等）ではスキップする。
+if command -v sudo &>/dev/null && sudo -v 2>/dev/null; then
+    while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+    SUDO_KEEPALIVE_PID=$!
+    trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
+fi
+
 # Install Homebrew if not present
 if ! command -v brew &>/dev/null; then
     echo "Installing Homebrew..."

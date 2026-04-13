@@ -24,12 +24,12 @@ brew "ffmpeg"
 brew "exiftool"
 
 # ─── Security & Networking ───
-brew "1password-cli"
 brew "cloudflared"
 
 if OS.mac?
   # ─── Essentials ───
   cask "1password"
+  cask "1password-cli"
   cask "raycast"
 
   # ─── Terminals & Editors ───
