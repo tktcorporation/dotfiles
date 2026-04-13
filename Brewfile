@@ -49,6 +49,7 @@ if OS.mac?
   # ─── Productivity ───
   cask "notion"
   cask "notion-calendar"
+  cask "notion-mail"
 
   # ─── Dev Infrastructure ───
   cask "orbstack"
@@ -60,8 +61,15 @@ if OS.mac?
   cask "cleanshot"
   cask "inkscape"
 
-  # ─── Other ───
+  # ─── AI ───
   cask "chatgpt"
+  cask "claude"
+
+  # ─── Input ───
+  cask "aqua-voice"
+  cask "typeless"
+
+  # ─── Other ───
   cask "thunderbird"
   cask "steam"
 
