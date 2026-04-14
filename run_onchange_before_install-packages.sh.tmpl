@@ -3,6 +3,17 @@ set -euo pipefail
 
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
 
+# ── クリーンアップ ──────────────────────────────────────────────
+# 複数のリソース（sudo keepalive プロセス、一時ファイル）を
+# 一つの trap ハンドラでまとめて掃除する。
+SUDO_KEEPALIVE_PID=""
+TMPBREWFILE=""
+cleanup() {
+    [ -n "$SUDO_KEEPALIVE_PID" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+    [ -n "$TMPBREWFILE" ] && rm -f "$TMPBREWFILE"
+}
+trap cleanup EXIT
+
 # ── sudo keepalive ──────────────────────────────────────────────
 # Homebrew のインストールや cask のインストール時に何度も
 # パスワードを求められるのを防ぐため、最初に1回だけ認証し
@@ -10,10 +21,12 @@ set -euo pipefail
 # パターンは Homebrew install.sh / mathiasbynens/dotfiles を参考。
 # sudo が存在しない環境や、sudoers に入っていない環境
 # （Linuxbrew 非 root、CI コンテナ等）ではスキップする。
-if command -v sudo &>/dev/null && sudo -v 2>/dev/null; then
-    while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
-    SUDO_KEEPALIVE_PID=$!
-    trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
+if command -v sudo &>/dev/null; then
+    echo "==> macOS のパスワードを入力してください（sudo 認証・この1回のみ）"
+    if sudo -v 2>/dev/null; then
+        while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+        SUDO_KEEPALIVE_PID=$!
+    fi
 fi
 
 # Install Homebrew if not present
@@ -31,5 +44,25 @@ if ! command -v brew &>/dev/null; then
     fi
 fi
 
+# ── mas (Mac App Store) サインイン状態チェック ──────────────────
+# mas install は Apple ID 認証（sudo とは別）が必要。
+# 未サインインだと予期しないパスワードプロンプトが出るため、
+# 事前にチェックし、未サインインなら mas 行を除外して実行する。
+BREWFILE={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
+MAS_SIGNED_IN=false
+if command -v mas &>/dev/null && mas account &>/dev/null; then
+    MAS_SIGNED_IN=true
+fi
+
 echo "Running brew bundle..."
-brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
+if [ "$MAS_SIGNED_IN" = true ]; then
+    brew bundle --file="$BREWFILE"
+else
+    if grep -q '^[[:space:]]*mas ' "$BREWFILE" 2>/dev/null; then
+        echo "==> [SKIP] Mac App Store 未サインインのため mas パッケージはスキップします"
+        echo "    App Store にサインイン後、chezmoi apply を再実行してください"
+    fi
+    TMPBREWFILE=$(mktemp)
+    grep -v '^[[:space:]]*mas ' "$BREWFILE" > "$TMPBREWFILE"
+    brew bundle --file="$TMPBREWFILE"
+fi
