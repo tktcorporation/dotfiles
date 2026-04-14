@@ -58,11 +58,11 @@ echo "Running brew bundle..."
 if [ "$MAS_SIGNED_IN" = true ]; then
     brew bundle --file="$BREWFILE"
 else
-    if grep -q '^\s*mas ' "$BREWFILE" 2>/dev/null; then
+    if grep -q '^[[:space:]]*mas ' "$BREWFILE" 2>/dev/null; then
         echo "==> [SKIP] Mac App Store 未サインインのため mas パッケージはスキップします"
         echo "    App Store にサインイン後、chezmoi apply を再実行してください"
     fi
     TMPBREWFILE=$(mktemp)
-    grep -v '^\s*mas ' "$BREWFILE" > "$TMPBREWFILE"
+    grep -v '^[[:space:]]*mas ' "$BREWFILE" > "$TMPBREWFILE"
     brew bundle --file="$TMPBREWFILE"
 fi
