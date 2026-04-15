@@ -71,10 +71,8 @@ if OS.mac?
 
   # ─── Other ───
   cask "thunderbird"
-  cask "steam"
 
   # ─── Mac App Store ───
   # mas install requires App Store sign-in
-  mas "LINE", id: 539883307
   mas "Xcode", id: 497799835
 end
