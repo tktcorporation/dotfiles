@@ -14,8 +14,10 @@ defaults write com.apple.finder ShowPathbar -bool true
 defaults write com.apple.finder ShowStatusBar -bool true
 
 # ─── Keyboard ───
-defaults write NSGlobalDomain InitialKeyRepeat -int 25
-defaults write NSGlobalDomain KeyRepeat -int 2
+# InitialKeyRepeat: キー入力開始までの遅延（10 = 最速、GUI最速は15）
+# KeyRepeat: キーリピート間隔（1 = 最速、GUI最速は2）
+defaults write NSGlobalDomain InitialKeyRepeat -int 10
+defaults write NSGlobalDomain KeyRepeat -int 1
 
 killall Dock Finder 2>/dev/null || true
 {{ end -}}
