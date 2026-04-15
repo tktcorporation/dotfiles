@@ -1,2 +1,2 @@
 font-size = 14
-theme = auto
+theme = light:GhosttyLight,dark:GhosttyDark
