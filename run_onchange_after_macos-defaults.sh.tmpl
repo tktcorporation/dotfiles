@@ -19,5 +19,13 @@ defaults write com.apple.finder ShowStatusBar -bool true
 defaults write NSGlobalDomain InitialKeyRepeat -int 10
 defaults write NSGlobalDomain KeyRepeat -int 1
 
-killall Dock Finder 2>/dev/null || true
+# ─── Screenshot ───
+# target: スクリーンショットの保存先を "clipboard" にすることで、
+# ファイル保存ではなくクリップボードへ直接コピーする。
+# 撮影後すぐに貼り付けて使うケースが多いため、デスクトップに画像が
+# 溜まらないようにするのが目的。
+# 値: file | clipboard | preview | mail
+defaults write com.apple.screencapture target -string "clipboard"
+
+killall Dock Finder SystemUIServer 2>/dev/null || true
 {{ end -}}
