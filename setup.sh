@@ -73,6 +73,66 @@ else
     echo "==> Xcode Command Line Tools already installed."
 fi
 
+# ── 1Password pre-flight ────────────────────────────────────────
+# .chezmoi.yaml.tmpl と dot_gitconfig.tmpl が 1Password に依存しているため、
+# chezmoi が走る前にここで早期検出して、何が足りないかを具体的に伝える。
+#
+# 「黙って degrade」ではなく fail-fast にする方針。
+# 過去に「op 未サインイン → signingkey が無音で空 → 数日後にコミット署名されてないと気付く」
+# という事故があったため、最初に止めて気付かせる。
+
+check_1password() {
+    # ── Case 1: op バイナリ未インストール ──────────────────────
+    if ! command -v op >/dev/null 2>&1; then
+        cat >&2 <<'EOF'
+
+==> ERROR: 1Password CLI (op) が見つかりません
+
+このセットアップは Git コミット署名のために 1Password を必須にしています。
+
+▶ 復旧手順:
+  1. 1Password アプリをインストール (まだなら):
+       https://1password.com/downloads/mac/
+  2. 1Password CLI をインストール:
+       brew install --cask 1password-cli
+  3. 1Password アプリにサインイン後、
+       Settings → Developer → "Integrate with 1Password CLI" を ON
+  4. ターミナル再起動後、もう一度 setup.sh を実行
+
+EOF
+        exit 1
+    fi
+
+    # ── Case 2: op はあるが、サインイン済みアカウントなし ─────
+    # `op account list` は サインイン済みアカウントが無いと空行を返す。
+    # </dev/null で "Do you want to add an account manually now?" の対話に入るのを防ぐ。
+    if ! op account list </dev/null 2>/dev/null | grep -q .; then
+        cat >&2 <<'EOF'
+
+==> ERROR: 1Password CLI が未サインインです
+
+▶ 復旧手順:
+  方法A (推奨): 1Password アプリ統合を有効化
+       1. 1Password アプリ → Settings → Developer
+       2. "Integrate with 1Password CLI" を ON
+       3. ターミナル再起動
+
+  方法B: コマンドラインで手動サインイン
+       op account add
+       op signin
+
+  確認:
+       op account list   # アカウントが表示されればOK
+
+その後もう一度 setup.sh を実行してください。
+
+EOF
+        exit 1
+    fi
+}
+
+check_1password
+
 # ── chezmoi init & apply ────────────────────────────────────────
 echo "==> Installing chezmoi and applying dotfiles..."
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
