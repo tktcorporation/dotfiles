@@ -1,48 +1,32 @@
 #!/bin/bash
 set -euo pipefail
 
+# 再実行トリガー: Brewfile または共通ライブラリが変わったら chezmoi が再走させる。
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
+# Bootstrap lib hash: {{ include "scripts/bootstrap-lib.sh" | sha256sum }}
+
+# ── 共通 bootstrap ライブラリを読み込む ─────────────────────────
+# sudo keepalive / Homebrew インストール / PATH 設定 を setup.sh と共有する。
+# shellcheck source=scripts/bootstrap-lib.sh
+source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
 
 # ── クリーンアップ ──────────────────────────────────────────────
-# 複数のリソース（sudo keepalive プロセス、一時ファイル）を
-# 一つの trap ハンドラでまとめて掃除する。
-SUDO_KEEPALIVE_PID=""
+# sudo keepalive プロセスと一時 Brewfile を一つの trap でまとめて掃除する。
 TMPBREWFILE=""
 cleanup() {
-    [ -n "$SUDO_KEEPALIVE_PID" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+    [ -n "${SUDO_KEEPALIVE_PID:-}" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
     [ -n "$TMPBREWFILE" ] && rm -f "$TMPBREWFILE"
 }
 trap cleanup EXIT
 
 # ── sudo keepalive ──────────────────────────────────────────────
-# Homebrew のインストールや cask のインストール時に何度も
-# パスワードを求められるのを防ぐため、最初に1回だけ認証し
-# バックグラウンドでタイムスタンプを更新し続ける。
-# パターンは Homebrew install.sh / mathiasbynens/dotfiles を参考。
-# sudo が存在しない環境や、sudoers に入っていない環境
-# （Linuxbrew 非 root、CI コンテナ等）ではスキップする。
-if command -v sudo &>/dev/null; then
-    echo "==> macOS のパスワードを入力してください（sudo 認証・この1回のみ）"
-    if sudo -v 2>/dev/null; then
-        while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
-        SUDO_KEEPALIVE_PID=$!
-    fi
-fi
+# setup.sh 経由ならここでは再認証プロンプトが出ない (credential が新鮮)。
+# chezmoi apply を手動実行する場合はここで初めてパスワードを聞かれる。
+echo "==> macOS のパスワードを入力してください（sudo 認証・この1回のみ）"
+start_sudo_keepalive
 
-# Install Homebrew if not present
-if ! command -v brew &>/dev/null; then
-    echo "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    # Add brew to PATH for this session
-    if [[ -f /opt/homebrew/bin/brew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [[ -f /usr/local/bin/brew ]]; then
-        eval "$(/usr/local/bin/brew shellenv)"
-    elif [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    fi
-fi
+install_homebrew_if_missing
+load_brew_shellenv
 
 # ── mas (Mac App Store) サインイン状態チェック ──────────────────
 # mas install は Apple ID 認証（sudo とは別）が必要。

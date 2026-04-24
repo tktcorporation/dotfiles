@@ -3,15 +3,24 @@ set -euo pipefail
 
 echo "==> dotfiles setup"
 
-# ── sudo keepalive ──────────────────────────────────────────────
-# セットアップ中に何度もパスワードを求められるのを防ぐため、
-# 最初に1回だけ認証しバックグラウンドでタイムスタンプを更新し続ける。
-# sudo が存在しない環境や、sudoers に入っていない環境ではスキップする。
-if command -v sudo &>/dev/null && sudo -v 2>/dev/null; then
-    while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
-    SUDO_KEEPALIVE_PID=$!
-    trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null || true' EXIT
+# ── 共通 bootstrap ライブラリを取得 ─────────────────────────────
+# setup.sh は curl|bash で実行されるため、この時点でリポジトリは未クローン。
+# 共通関数 (sudo keepalive、Homebrew インストール、PATH 設定) を
+# リモートから取って source する。run_onchange スクリプトも同じファイルを
+# source するので SSOT が保たれる。
+BOOTSTRAP_LIB_URL="${BOOTSTRAP_LIB_URL:-https://raw.githubusercontent.com/tktcorporation/dotfiles/main/scripts/bootstrap-lib.sh}"
+BOOTSTRAP_LIB_TMP=$(mktemp)
+trap 'rm -f "$BOOTSTRAP_LIB_TMP"' EXIT
+if ! curl -fsSL "$BOOTSTRAP_LIB_URL" -o "$BOOTSTRAP_LIB_TMP"; then
+    echo "ERROR: Failed to fetch bootstrap library from $BOOTSTRAP_LIB_URL" >&2
+    exit 1
 fi
+# shellcheck source=/dev/null
+source "$BOOTSTRAP_LIB_TMP"
+
+# ── sudo keepalive ──────────────────────────────────────────────
+start_sudo_keepalive
+trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true; rm -f "$BOOTSTRAP_LIB_TMP"' EXIT
 
 # ── Xcode Command Line Tools ────────────────────────────────────
 if ! xcode-select -p &>/dev/null; then
@@ -86,19 +95,8 @@ fi
 #
 # 「op が未準備なら無音 degrade」から「fail-fast with guidance」への方針転換。
 
-# Homebrew
-if ! command -v brew >/dev/null 2>&1; then
-    echo "==> Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-
-# brew を現在セッションの PATH に通す (Apple Silicon / Intel 両対応)
-# Homebrew インストール直後は PATH に入っていないため明示的に設定する。
-if [ -x /opt/homebrew/bin/brew ]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [ -x /usr/local/bin/brew ]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-fi
+install_homebrew_if_missing
+load_brew_shellenv
 
 # 1Password アプリ (GUI): 既存の /Applications/1Password.app を尊重。
 # Mac App Store や公式 DMG で入れた場合と衝突しないよう、ディレクトリの
