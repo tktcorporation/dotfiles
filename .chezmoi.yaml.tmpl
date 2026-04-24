@@ -15,13 +15,13 @@
 {{- end -}}
 
 {{- /* ─── 1Password pre-flight (defense in depth) ─────────────
-       通常は setup.sh の check_1password() で先に弾かれる。
-       ここは `chezmoi init tktcorporation` を直接叩いた場合の保険。
-       チェックは「op バイナリ存在 && サインイン済みアカウントあり」の二段。
-       echo の出力が "ok" でなければ fail する。 */ -}}
+       通常は setup.sh が Homebrew / 1Password / op の bootstrap と
+       サインインチェックを済ませてから chezmoi を起動する。
+       ここのチェックは `chezmoi init tktcorporation` を直接叩いた人向けの保険。
+       op バイナリ存在 && サインイン済みアカウントあり の二条件。 */ -}}
 {{- $opStatus := output "sh" "-c" "command -v op >/dev/null 2>&1 && op account list </dev/null 2>/dev/null | grep -q . && echo ok || echo missing" | trim -}}
 {{- if ne $opStatus "ok" -}}
-{{-   writeToStderr "\n==> ERROR: 1Password CLI が利用できません (未インストール or 未サインイン)\n\n   復旧手順は setup.sh の check_1password() のメッセージを参照、\n   または:\n     - インストール: brew install --cask 1password 1password-cli\n     - サインイン: 1Password アプリ → Settings → Developer → CLI 統合 ON\n\n" -}}
+{{-   writeToStderr "\n==> ERROR: 1Password CLI が利用できないため chezmoi を続行できません。\n\n   推奨: setup.sh 経由で実行してください (bootstrap 込みで一気通貫):\n     bash <(curl -fsLS https://raw.githubusercontent.com/tktcorporation/dotfiles/main/setup.sh)\n\n   個別に準備する場合は:\n     - 1Password アプリと CLI をインストール (brew install --cask 1password 1password-cli)\n     - 1Password アプリで Settings → Developer → CLI 統合 ON\n     - op account list でアカウントが見えることを確認\n\n" -}}
 {{-   fail "1Password unavailable; aborting chezmoi template processing." -}}
 {{- end -}}
 

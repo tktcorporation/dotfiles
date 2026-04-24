@@ -73,65 +73,78 @@ else
     echo "==> Xcode Command Line Tools already installed."
 fi
 
-# ── 1Password pre-flight ────────────────────────────────────────
+# ── 1Password bootstrap ─────────────────────────────────────────
 # .chezmoi.yaml.tmpl と dot_gitconfig.tmpl が 1Password に依存しているため、
-# chezmoi が走る前にここで早期検出して、何が足りないかを具体的に伝える。
+# chezmoi が走る前にここで最小限の bootstrap を済ませる:
+#   1. Homebrew を用意 (なければインストール)
+#   2. 1Password アプリ (GUI) が無ければ cask で入れる (既存インストールは尊重)
+#   3. 1Password CLI (op) が無ければ cask で入れる
+#   4. サインイン状態をチェック。未サインインなら復旧手順を出して exit 1
 #
-# 「黙って degrade」ではなく fail-fast にする方針。
-# 過去に「op 未サインイン → signingkey が無音で空 → 数日後にコミット署名されてないと気付く」
-# という事故があったため、最初に止めて気付かせる。
+# 残りの Brewfile 全体は chezmoi apply 中に run_onchange_before_install-packages.sh
+# が適用する。ここで入れる 2 つは後段で no-op になるだけ (idempotent)。
+#
+# 「op が未準備なら無音 degrade」から「fail-fast with guidance」への方針転換。
 
-check_1password() {
-    # ── Case 1: op バイナリ未インストール ──────────────────────
-    if ! command -v op >/dev/null 2>&1; then
-        cat >&2 <<'EOF'
+# Homebrew
+if ! command -v brew >/dev/null 2>&1; then
+    echo "==> Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
-==> ERROR: 1Password CLI (op) が見つかりません
+# brew を現在セッションの PATH に通す (Apple Silicon / Intel 両対応)
+# Homebrew インストール直後は PATH に入っていないため明示的に設定する。
+if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
 
-このセットアップは Git コミット署名のために 1Password を必須にしています。
+# 1Password アプリ (GUI): 既存の /Applications/1Password.app を尊重。
+# Mac App Store や公式 DMG で入れた場合と衝突しないよう、ディレクトリの
+# 有無で判定してから cask インストールする。
+if [ ! -d /Applications/1Password.app ]; then
+    echo "==> Installing 1Password (app)..."
+    brew install --cask 1password
+fi
 
-▶ 復旧手順:
-  1. 1Password アプリをインストール (まだなら):
-       https://1password.com/downloads/mac/
-  2. 1Password CLI をインストール:
-       brew install --cask 1password-cli
-  3. 1Password アプリにサインイン後、
-       Settings → Developer → "Integrate with 1Password CLI" を ON
-  4. ターミナル再起動後、もう一度 setup.sh を実行
+# 1Password CLI (op)
+if ! command -v op >/dev/null 2>&1; then
+    echo "==> Installing 1Password CLI..."
+    brew install --cask 1password-cli
+fi
 
-EOF
-        exit 1
-    fi
+# ── 1Password サインイン状態チェック (ユーザー操作必須) ────────
+# op バイナリまでは自動で揃えられるが、サインインはユーザーにしか
+# できない。未サインインなら明確な手順を示して止める。
+#
+# `op account list` は 未サインインだと空出力で exit 0 を返すため
+# `grep -q .` で「1行でも出るか」を判定する。`</dev/null` は op が
+# 対話プロンプト (Do you want to add an account manually now?) に
+# 入るのを防ぐためのガード。
+if ! op account list </dev/null 2>/dev/null | grep -q .; then
+    cat >&2 <<'EOF'
 
-    # ── Case 2: op はあるが、サインイン済みアカウントなし ─────
-    # `op account list` は サインイン済みアカウントが無いと空行を返す。
-    # </dev/null で "Do you want to add an account manually now?" の対話に入るのを防ぐ。
-    if ! op account list </dev/null 2>/dev/null | grep -q .; then
-        cat >&2 <<'EOF'
+==> 1Password にサインインしてください
 
-==> ERROR: 1Password CLI が未サインインです
+1Password アプリと CLI は準備できました。最後のひと手間として、
+サインインが必要です。chezmoi はここから SSH 署名キーを取得します。
 
-▶ 復旧手順:
-  方法A (推奨): 1Password アプリ統合を有効化
-       1. 1Password アプリ → Settings → Developer
-       2. "Integrate with 1Password CLI" を ON
-       3. ターミナル再起動
+▶ やること:
+  1. 1Password アプリを起動してサインイン
+  2. アプリ内 Settings → Developer → "Integrate with 1Password CLI" を ON
+  3. ターミナルを開き直す (shellenv 再読込のため)
+  4. 確認:
+       op account list   # アカウントが表示されればOK
+  5. もう一度 setup.sh を実行
 
-  方法B: コマンドラインで手動サインイン
+補足: GUI を使わず CLI だけでサインインしたい場合は:
        op account add
        op signin
 
-  確認:
-       op account list   # アカウントが表示されればOK
-
-その後もう一度 setup.sh を実行してください。
-
 EOF
-        exit 1
-    fi
-}
-
-check_1password
+    exit 1
+fi
 
 # ── chezmoi init & apply ────────────────────────────────────────
 echo "==> Installing chezmoi and applying dotfiles..."
