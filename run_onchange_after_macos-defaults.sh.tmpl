@@ -2,30 +2,50 @@
 {{ if eq .chezmoi.os "darwin" -}}
 set -euo pipefail
 
-# ─── Dock ───
-defaults write com.apple.dock autohide -bool true
-defaults write com.apple.dock mru-spaces -bool false
-defaults write com.apple.dock show-recents -bool false
+# macOS の各種デフォルト設定を宣言的に管理する。
+# 設定を追加するときは SETTINGS と RESTART_APPS を編集するだけでよい。
+#
+# SETTINGS の形式:
+#   "<domain>|<key>|<type>|<value>"
+#     domain: NSGlobalDomain や com.apple.* などの defaults ドメイン
+#     type:   bool | int | float | string（`defaults write -<type>` に渡る）
+#     value:  設定値。string の場合はそのまま文字列として書き込む。
+#
+# RESTART_APPS: 設定反映に再起動が必要なプロセス名の一覧。
+#   - Dock / Finder: Dock と Finder の見た目/挙動変更の反映
+#   - SystemUIServer: メニューバー・スクリーンショット挙動等の反映
 
-# ─── Finder ───
-defaults write com.apple.finder AppleShowAllExtensions -bool true
-defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
-defaults write com.apple.finder ShowPathbar -bool true
-defaults write com.apple.finder ShowStatusBar -bool true
+SETTINGS=(
+  # ─── Dock ───
+  "com.apple.dock|autohide|bool|true"
+  "com.apple.dock|mru-spaces|bool|false"
+  "com.apple.dock|show-recents|bool|false"
 
-# ─── Keyboard ───
-# InitialKeyRepeat: キー入力開始までの遅延（10 = 最速、GUI最速は15）
-# KeyRepeat: キーリピート間隔（1 = 最速、GUI最速は2）
-defaults write NSGlobalDomain InitialKeyRepeat -int 10
-defaults write NSGlobalDomain KeyRepeat -int 1
+  # ─── Finder ───
+  "com.apple.finder|AppleShowAllExtensions|bool|true"
+  "com.apple.finder|FXPreferredViewStyle|string|clmv"
+  "com.apple.finder|ShowPathbar|bool|true"
+  "com.apple.finder|ShowStatusBar|bool|true"
 
-# ─── Screenshot ───
-# target: スクリーンショットの保存先を "clipboard" にすることで、
-# ファイル保存ではなくクリップボードへ直接コピーする。
-# 撮影後すぐに貼り付けて使うケースが多いため、デスクトップに画像が
-# 溜まらないようにするのが目的。
-# 値: file | clipboard | preview | mail
-defaults write com.apple.screencapture target -string "clipboard"
+  # ─── Keyboard ───
+  # InitialKeyRepeat: キー入力開始までの遅延（10 = 最速、GUI最速は15）
+  # KeyRepeat: キーリピート間隔（1 = 最速、GUI最速は2）
+  "NSGlobalDomain|InitialKeyRepeat|int|10"
+  "NSGlobalDomain|KeyRepeat|int|1"
 
-killall Dock Finder SystemUIServer 2>/dev/null || true
+  # ─── Screenshot ───
+  # target: 撮影後すぐに貼り付ける運用を前提に、保存先をクリップボードに固定。
+  # デスクトップに画像ファイルが溜まらないようにするのが目的。
+  # 値: file | clipboard | preview | mail
+  "com.apple.screencapture|target|string|clipboard"
+)
+
+RESTART_APPS=(Dock Finder SystemUIServer)
+
+for entry in "${SETTINGS[@]}"; do
+  IFS='|' read -r domain key type value <<< "$entry"
+  defaults write "$domain" "$key" "-$type" "$value"
+done
+
+killall "${RESTART_APPS[@]}" 2>/dev/null || true
 {{ end -}}
