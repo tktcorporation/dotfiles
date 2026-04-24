@@ -15,8 +15,12 @@
 {{- end -}}
 
 {{- /* ─── SSH signing key from 1Password ─── */ -}}
+{{- /* stdin を /dev/null に向けないと、未サインイン環境で op が
+       「Do you want to add an account manually now?」の対話に入り
+       chezmoi が stdin を待って止まってしまう。
+       2>/dev/null で案内メッセージも抑止する。 */ -}}
 {{- $signingkey := "" -}}
-{{- $detectedKey := output "sh" "-c" "op item get 'Github SSHキー' --account my.1password.com --fields public_key 2>/dev/null || true" | trim -}}
+{{- $detectedKey := output "sh" "-c" "op item get 'Github SSHキー' --account my.1password.com --fields public_key </dev/null 2>/dev/null || true" | trim -}}
 {{- if $detectedKey -}}
 {{-   $useKey := promptBoolOnce . "useDetectedKey" (printf "Use this SSH key for commit signing?\n  %s" $detectedKey) -}}
 {{-   if $useKey -}}
