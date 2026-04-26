@@ -37,11 +37,25 @@ start_sudo_keepalive() {
 
 # Homebrew が未インストールなら公式 installer を実行する。
 # 既にインストール済みなら何もしない (idempotent)。
+#
+# 「インストール済み」の判定は 2 段階:
+#   1. PATH 経由で `brew` コマンドが見える (普通の対話 shell)
+#   2. 既知のインストールパスにバイナリが存在 (PATH 未設定の非対話 shell 向け)
+#
+# 2 を入れている理由: bash <(curl ...) 経由の非ログイン shell では PATH に
+# /opt/homebrew/bin が入っていない場合があり、command -v brew だけだと
+# 「既に入っているのに再インストール」してしまう (PR #89 Codex review)。
 install_homebrew_if_missing() {
-    if ! command -v brew >/dev/null 2>&1; then
-        echo "==> Installing Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    if command -v brew >/dev/null 2>&1; then
+        return
     fi
+    if [ -x /opt/homebrew/bin/brew ] \
+        || [ -x /usr/local/bin/brew ] \
+        || [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+        return
+    fi
+    echo "==> Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
 # brew を現在シェルセッションの PATH に通す。
