@@ -132,11 +132,12 @@ fi
 # op バイナリまでは自動で揃えられるが、サインインはユーザーにしか
 # できない。未サインインなら明確な手順を示して止める。
 #
-# `op account list` は 未サインインだと空出力で exit 0 を返すため
-# `grep -q .` で「1行でも出るか」を判定する。`</dev/null` は op が
-# 対話プロンプト (Do you want to add an account manually now?) に
-# 入るのを防ぐためのガード。
-if ! op account list </dev/null 2>/dev/null | grep -q .; then
+# `op whoami` は **認証必須** のコマンドなので、サインアウト中や
+# セッション失効中なら exit 非ゼロで失敗する。`op account list` は
+# 「アカウント設定の有無」しか確認しないため、サインアウト中でも通って
+# しまう (PR #89 Codex review で指摘) ため使わない。
+# </dev/null は op が対話プロンプトに入るのを防ぐためのガード。
+if ! op whoami </dev/null >/dev/null 2>&1; then
     cat >&2 <<'EOF'
 
 ==> 1Password にサインインしてください
@@ -149,7 +150,7 @@ if ! op account list </dev/null 2>/dev/null | grep -q .; then
   2. アプリ内 Settings → Developer → "Integrate with 1Password CLI" を ON
   3. ターミナルを開き直す (shellenv 再読込のため)
   4. 確認:
-       op account list   # アカウントが表示されればOK
+       op whoami         # アカウント情報が表示されればOK (アクティブなセッションが必要)
   5. もう一度 setup.sh を実行
 
 補足: GUI を使わず CLI だけでサインインしたい場合は:
