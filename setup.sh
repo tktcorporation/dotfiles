@@ -18,6 +18,22 @@ fi
 # shellcheck source=/dev/null
 source "$BOOTSTRAP_LIB_TMP"
 
+# ライブラリが期待通り読めたかを検証する。
+# setup.sh と bootstrap-lib.sh は別々に curl で取得されるため、
+# 万が一両者のリビジョンがズレて関数が消えていた場合、ここで明確に止める。
+# (See PR #89 review: pin bootstrap-lib fetch to the same setup.sh revision)
+for fn in start_sudo_keepalive install_homebrew_if_missing load_brew_shellenv; do
+    if ! declare -F "$fn" >/dev/null; then
+        cat >&2 <<EOF
+ERROR: Bootstrap library is missing expected function: $fn
+       setup.sh と bootstrap-lib.sh のリビジョンがズレた可能性があります。
+       数秒待って再実行するか、BOOTSTRAP_LIB_URL を特定コミットに固定してください。
+       Source: $BOOTSTRAP_LIB_URL
+EOF
+        exit 1
+    fi
+done
+
 # ── sudo keepalive ──────────────────────────────────────────────
 start_sudo_keepalive
 trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true; rm -f "$BOOTSTRAP_LIB_TMP"' EXIT
