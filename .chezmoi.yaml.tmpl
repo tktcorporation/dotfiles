@@ -14,9 +14,29 @@
 {{-   $email = promptStringOnce . "email" "Git email address" -}}
 {{- end -}}
 
+{{- /* ─── 1Password pre-flight (defense in depth) ─────────────
+       通常は setup.sh が Homebrew / 1Password / op の bootstrap と
+       サインインチェックを済ませてから chezmoi を起動する。
+       ここのチェックは `chezmoi init tktcorporation` を直接叩いた人向けの保険。
+       なお chezmoi の仕様上、このファイルは `chezmoi init` 時のみ評価され、
+       通常の `chezmoi apply` / `chezmoi update` では再評価されない
+       (https://www.chezmoi.io/reference/commands/init/)。
+
+       op バイナリ存在 && アクティブなサインイン中 の二条件。
+       `op whoami` を使うのは、`op account list` だと「設定済みだがサインアウト中」
+       が ok 判定されてしまうため (PR #89 Codex review)。 */ -}}
+{{- $opStatus := output "sh" "-c" "command -v op >/dev/null 2>&1 && op whoami </dev/null >/dev/null 2>&1 && echo ok || echo missing" | trim -}}
+{{- if ne $opStatus "ok" -}}
+{{-   writeToStderr "\n==> ERROR: 1Password CLI が利用できないため chezmoi を続行できません。\n\n   推奨: setup.sh 経由で実行してください (bootstrap 込みで一気通貫):\n     bash <(curl -fsLS https://raw.githubusercontent.com/tktcorporation/dotfiles/main/setup.sh)\n\n   個別に準備する場合は:\n     - 1Password アプリと CLI をインストール (brew install --cask 1password 1password-cli)\n     - 1Password アプリで Settings → Developer → CLI 統合 ON\n     - op whoami でアクティブなサインインがあることを確認\n\n" -}}
+{{-   fail "1Password unavailable; aborting chezmoi template processing." -}}
+{{- end -}}
+
 {{- /* ─── SSH signing key from 1Password ─── */ -}}
+{{- /* ここに到達した時点で op はサインイン済みが保証されている。
+       それでもアイテムが見つからない可能性はあるので || true は残す。
+       stdin /dev/null は op の対話プロンプト防止（保険）。 */ -}}
 {{- $signingkey := "" -}}
-{{- $detectedKey := output "sh" "-c" "op item get 'Github SSHキー' --account my.1password.com --fields public_key 2>/dev/null || true" | trim -}}
+{{- $detectedKey := output "sh" "-c" "op item get 'Github SSHキー' --account my.1password.com --fields public_key </dev/null 2>/dev/null || true" | trim -}}
 {{- if $detectedKey -}}
 {{-   $useKey := promptBoolOnce . "useDetectedKey" (printf "Use this SSH key for commit signing?\n  %s" $detectedKey) -}}
 {{-   if $useKey -}}
