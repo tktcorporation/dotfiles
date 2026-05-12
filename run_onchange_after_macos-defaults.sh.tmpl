@@ -38,6 +38,14 @@ SETTINGS=(
   # デスクトップに画像ファイルが溜まらないようにするのが目的。
   # 値: file | clipboard | preview | mail
   "com.apple.screencapture|target|string|clipboard"
+
+  # ─── Trackpad ───
+  # com.apple.trackpad.forceClick: テキスト選択中に強く押し込んでしまった際に
+  # 辞書/データ検出のポップアップが出るのを止める。
+  # システム設定の「調べる&データ検出」を「オフ」にしたときに切り替わるキーで、
+  # Force Click 機能全体（ファイルリネーム強押し等）は ForceSuppressed/ActuateDetents
+  # 側で制御されており、こちらは引き続き有効のまま残る。
+  "NSGlobalDomain|com.apple.trackpad.forceClick|bool|false"
 )
 
 RESTART_APPS=(Dock Finder SystemUIServer)
