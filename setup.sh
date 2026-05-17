@@ -161,6 +161,37 @@ EOF
     exit 1
 fi
 
+# ── 既存 chezmoi source の更新 ──────────────────────────────────
+# `chezmoi init <repo>` は ~/.local/share/chezmoi が既に存在する場合に
+# clone をスキップするが、pull は走らない。setup.sh を再実行した時に
+# 古い source を使い続ける罠 (例: writeToStderr バグ修正後も古い template
+# でコケ続ける) を避けるため、明示的に fast-forward pull する。
+# 未マージのローカル変更や divergent branch がある場合は --ff-only が
+# 失敗するので, 手元のカスタマイズを壊さない安全側に倒している。
+# XDG Base Directory Spec に従う: XDG_DATA_HOME が set なら $XDG_DATA_HOME/chezmoi。
+# chezmoi 本体も同じ規約で source dir を解決するため、ここを揃えないと
+# XDG_DATA_HOME を使っている環境で update が無効になる (Codex review PR #93)。
+CHEZMOI_SOURCE="${XDG_DATA_HOME:-${HOME}/.local/share}/chezmoi"
+if [ -d "$CHEZMOI_SOURCE/.git" ]; then
+    echo "==> Updating existing chezmoi source ($CHEZMOI_SOURCE)..."
+    if ! git -C "$CHEZMOI_SOURCE" pull --ff-only; then
+        cat >&2 <<EOF
+
+==> WARNING: chezmoi source の fast-forward pull に失敗しました
+   $CHEZMOI_SOURCE にローカル変更や divergent commit がある可能性があります。
+   このまま chezmoi init --apply を続けると古いテンプレで処理される恐れがあります。
+
+   復旧手順 (どちらか):
+     A) ローカル変更を整理してから setup.sh を再実行:
+          cd "$CHEZMOI_SOURCE" && git status
+     B) ローカル変更が不要なら source を作り直して setup.sh を再実行:
+          rm -rf "$CHEZMOI_SOURCE"
+
+EOF
+        exit 1
+    fi
+fi
+
 # ── chezmoi init & apply ────────────────────────────────────────
 echo "==> Installing chezmoi and applying dotfiles..."
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
