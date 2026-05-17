@@ -68,6 +68,7 @@ if OS.mac?
   # ─── Input ───
   cask "aqua-voice"
   cask "typeless"
+  cask "karabiner-elements"
 
   # ─── Other ───
   cask "thunderbird"
