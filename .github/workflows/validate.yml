@@ -53,14 +53,11 @@ jobs:
 
       - name: Validate templates (syntax check)
         run: |
-          # chezmoi doctor verifies the source directory is valid
-          # Use --no-pager to avoid interactive output
-          chezmoi --source="$(pwd)" verify 2>&1 || true
-
-          # Basic Go template syntax validation
+          # Basic Go template syntax validation: 開閉ペアの数だけを見る軽量チェック。
+          # 下の execute-template でも実質的にカバーされるが、こちらは chezmoi が
+          # 動かない状況でも単独で機能するので残している。
           errors=0
           for f in $(find . -name '*.tmpl' -not -path './.git/*'); do
-            # Check for unmatched {{ }} pairs (basic syntax validation)
             open_count=$(grep -o '{{' "$f" | wc -l | tr -d ' ')
             close_count=$(grep -o '}}' "$f" | wc -l | tr -d ' ')
             if [ "$open_count" != "$close_count" ]; then
@@ -70,7 +67,30 @@ jobs:
           done
 
           if [ "$errors" -gt 0 ]; then
-            echo "::error::$errors template(s) have syntax issues"
+            echo "::error::$errors template(s) have delimiter mismatch"
             exit 1
           fi
-          echo "All templates validated"
+          echo "All templates have balanced delimiters"
+
+      - name: Validate template execution (detect undefined chezmoi functions)
+        run: |
+          # text/template は関数の存在をパース時に解決するため、未到達ブランチに
+          # 紛れ込んだ未定義関数 (例: かつての writeToStderr) もここで弾ける。
+          # `output` 内で op CLI を呼ぶ箇所は CI 環境では失敗するが、それは
+          # `fail` 等で正常に拾われるエラーで CI fail の対象ではない。
+          # ここでは "function ... not defined" だけを拾って失敗扱いにする。
+          errors=0
+          for f in $(find . -name '*.tmpl' -not -path './.git/*'); do
+            out=$(chezmoi execute-template --init < "$f" 2>&1 || true)
+            if echo "$out" | grep -qE 'function "[^"]+" not defined'; then
+              echo "::error::$f references an undefined chezmoi template function:"
+              echo "$out" | sed 's/^/  /' | head -5
+              errors=$((errors + 1))
+            fi
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors template(s) reference undefined functions"
+            exit 1
+          fi
+          echo "All templates use only known chezmoi functions"
