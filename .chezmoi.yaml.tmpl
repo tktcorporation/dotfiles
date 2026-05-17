@@ -26,9 +26,11 @@
        `op whoami` を使うのは、`op account list` だと「設定済みだがサインアウト中」
        が ok 判定されてしまうため (PR #89 Codex review)。 */ -}}
 {{- $opStatus := output "sh" "-c" "command -v op >/dev/null 2>&1 && op whoami </dev/null >/dev/null 2>&1 && echo ok || echo missing" | trim -}}
+{{- /* writeToStderr は chezmoi に存在しない関数だったため fail のメッセージに統合。
+       fail はメッセージを stderr に出力して chezmoi を即終了させるので、
+       writeToStderr + fail のセットと同じ効果が一発で得られる。 */ -}}
 {{- if ne $opStatus "ok" -}}
-{{-   writeToStderr "\n==> ERROR: 1Password CLI が利用できないため chezmoi を続行できません。\n\n   推奨: setup.sh 経由で実行してください (bootstrap 込みで一気通貫):\n     bash <(curl -fsLS https://raw.githubusercontent.com/tktcorporation/dotfiles/main/setup.sh)\n\n   個別に準備する場合は:\n     - 1Password アプリと CLI をインストール (brew install --cask 1password 1password-cli)\n     - 1Password アプリで Settings → Developer → CLI 統合 ON\n     - op whoami でアクティブなサインインがあることを確認\n\n" -}}
-{{-   fail "1Password unavailable; aborting chezmoi template processing." -}}
+{{-   fail "\n==> ERROR: 1Password CLI が利用できないため chezmoi を続行できません。\n\n   推奨: setup.sh 経由で実行してください (bootstrap 込みで一気通貫):\n     bash <(curl -fsLS https://raw.githubusercontent.com/tktcorporation/dotfiles/main/setup.sh)\n\n   個別に準備する場合は:\n     - 1Password アプリと CLI をインストール (brew install --cask 1password 1password-cli)\n     - 1Password アプリで Settings → Developer → CLI 統合 ON\n     - op whoami でアクティブなサインインがあることを確認\n" -}}
 {{- end -}}
 
 {{- /* ─── SSH signing key from 1Password ─── */ -}}
