@@ -1,0 +1,28 @@
+{
+  "title": "Command 単押しで英数/かな切り替え (US キーボード向け)",
+  "rules": [
+    {
+      "description": "左Command 単押しで英数、右Command 単押しでかな (他キー併用時は通常の Command として動作)",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_command",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [{ "key_code": "left_command", "lazy": true }],
+          "to_if_alone": [{ "key_code": "japanese_eisuu" }]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "right_command",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [{ "key_code": "right_command", "lazy": true }],
+          "to_if_alone": [{ "key_code": "japanese_kana" }]
+        }
+      ]
+    }
+  ]
+}
