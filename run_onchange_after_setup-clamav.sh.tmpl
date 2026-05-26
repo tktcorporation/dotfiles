@@ -1,0 +1,50 @@
+#!/bin/bash
+set -euo pipefail
+
+# Brewfile に clamav を含めているため、apply のたびにスキャン可能な状態を保つ。
+# 1) freshclam.conf / clamd.conf を sample から生成する（無ければ）
+# 2) 定義 DB が空なら freshclam を走らせて初期取得する
+#
+# Brewfile hash: {{ include "Brewfile" | sha256sum }}
+
+if ! command -v brew >/dev/null 2>&1; then
+  echo "==> [SKIP] brew が見つからないため clamav セットアップをスキップします"
+  exit 0
+fi
+
+BREW_PREFIX="$(brew --prefix)"
+CLAMAV_ETC="$BREW_PREFIX/etc/clamav"
+CLAMAV_DB="$BREW_PREFIX/var/lib/clamav"
+
+if ! command -v freshclam >/dev/null 2>&1 || [ ! -d "$CLAMAV_ETC" ]; then
+  echo "==> [SKIP] clamav が未インストールのため設定をスキップします"
+  exit 0
+fi
+
+# Homebrew が配る *.conf.sample は冒頭に `Example` 行が入っており、
+# これが残ったままだと freshclam/clamd が「テンプレ未編集」と判断して
+# `ERROR: Can't open/parse the config file` で起動拒否する。
+# sample をコピーする際にこの行だけコメントアウトしておく。
+init_conf_from_sample() {
+  local name="$1"
+  local target="$CLAMAV_ETC/$name"
+  local sample="$CLAMAV_ETC/$name.sample"
+  if [ -f "$target" ] || [ ! -f "$sample" ]; then
+    return
+  fi
+  echo "==> Initializing $target from sample"
+  sed 's/^Example$/#Example/' "$sample" > "$target"
+}
+
+init_conf_from_sample freshclam.conf
+init_conf_from_sample clamd.conf
+
+# 定義 DB が空のときだけ初期ダウンロードする（数分・~250MB）。
+# 既に DB があれば freshclam を毎回叩かない（apply 時間が伸びるのを防ぐ）。
+# 定期更新したい場合は別途 launchd/cron で `freshclam` を回すこと。
+if [ -z "$(ls -A "$CLAMAV_DB" 2>/dev/null)" ]; then
+  echo "==> Downloading initial ClamAV virus database (数分かかります)"
+  if ! freshclam; then
+    echo "==> [WARN] freshclam が失敗しました。後で手動実行してください: freshclam"
+  fi
+fi
