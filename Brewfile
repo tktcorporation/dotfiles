@@ -25,6 +25,7 @@ brew "exiftool"
 
 # ─── Security & Networking ───
 brew "cloudflared"
+brew "clamav"
 
 if OS.mac?
   # ─── Essentials ───
