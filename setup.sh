@@ -38,6 +38,38 @@ done
 start_sudo_keepalive
 trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true; rm -f "$BOOTSTRAP_LIB_TMP"' EXIT
 
+# ── Touch ID for sudo ───────────────────────────────────────────
+# brew cask は cask 毎に sudo を発行するため、Touch ID 無効だと
+# install 中にパスワード入力が連発する (Brewfile に cask が 20+ ある現状は煩雑)。
+# macOS Sonoma 以降は /etc/pam.d/sudo_local が OS update でも保持される
+# 追加 PAM 設定として用意されており、pam_tid.so を有効化すれば
+# sudo が Touch ID を受け付ける。
+#
+# 安全性:
+#   - sufficient なので Touch ID 不在/失敗時は通常のパスワード認証に fallthrough
+#   - Touch ID 未登録 / 非対応ハード (Mac mini 等) でも害なし
+#   - sudo_local は OS update でリセットされる /etc/pam.d/sudo とは別ファイル
+if [ -f /etc/pam.d/sudo_local.template ] && \
+   ! sudo -n grep -q '^auth.*pam_tid\.so' /etc/pam.d/sudo_local 2>/dev/null; then
+    echo "==> Enabling Touch ID for sudo (/etc/pam.d/sudo_local)..."
+    # 既存ファイルがあれば中身を維持して append, なければ新規作成。
+    # sudo_local は local customization 用のファイルなので、
+    # ユーザーが他のルールを書いていた場合に破壊しないこと (Codex review PR #96)。
+    if sudo -n test -e /etc/pam.d/sudo_local; then
+        sudo tee -a /etc/pam.d/sudo_local >/dev/null <<'EOF'
+
+# Touch ID for sudo (added by tktcorporation/dotfiles setup.sh)
+auth       sufficient     pam_tid.so
+EOF
+    else
+        sudo tee /etc/pam.d/sudo_local >/dev/null <<'EOF'
+# Managed by tktcorporation/dotfiles setup.sh
+# Touch ID を sudo で使えるようにする。失敗時はパスワード認証にフォールスルー。
+auth       sufficient     pam_tid.so
+EOF
+    fi
+fi
+
 # ── Xcode Command Line Tools ────────────────────────────────────
 if ! xcode-select -p &>/dev/null; then
     echo "==> Installing Xcode Command Line Tools..."
