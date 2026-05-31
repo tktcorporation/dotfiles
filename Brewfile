@@ -37,7 +37,6 @@ if OS.mac?
   cask "ghostty"
   cask "warp"
   cask "visual-studio-code"
-  cask "cursor"
 
   # ─── Browsers ───
   cask "arc"
