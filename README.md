@@ -57,8 +57,11 @@ dot_zshrc                                    # ~/.zshrc (mise, tool init, aliase
 private_dot_ssh/private_config.tmpl          # ~/.ssh/config (1Password SSH agent + OrbStack)
 dot_config/mise/config.toml                  # ~/.config/mise/config.toml (ランタイム管理)
 dot_config/ghostty/config                    # ~/.config/ghostty/config
+dot_config/karabiner/karabiner.json          # Karabiner 本体設定 (両ルールを有効化済み)
 dot_config/karabiner/assets/complex_modifications/cmd-eisuu-kana.json
-                                             # Karabiner: 左右Command 単押しで英数/かな切り替え
+                                             # Karabiner: 左右Command 単押しで英数/かな切り替え (GUI 取込用)
+dot_config/karabiner/assets/complex_modifications/caps-to-control.json
+                                             # Karabiner: Caps Lock を Control に変更 (GUI 取込用)
 run_onchange_before_install-packages.sh.tmpl # Brewfile 変更時に自動で brew bundle
 run_once_after_macos-defaults.sh.tmpl        # macOS 初回セットアップ時のシステム設定
 run_onchange_after_setup-tools.sh.tmpl       # mise config 変更時にランタイムインストール
@@ -78,16 +81,18 @@ run_onchange_after_setup-tools.sh.tmpl       # mise config 変更時にランタ
 - **SSH agent**: `~/.ssh/config` に OS に応じた `IdentityAgent` を自動設定
 - **commit signing**: 初回セットアップ時に SSH 公開鍵を入力すると `op-ssh-sign` 経由の署名を自動設定 (空欄でスキップ可)
 
-## Karabiner-Elements (英かな切り替え)
+## Karabiner-Elements (キーマッピング)
 
-US キーボードで左右 Command 単押しを 英数 / かな に割り当てる complex modification を `dot_config/karabiner/assets/complex_modifications/cmd-eisuu-kana.json` で配布しています.
+`~/.config/karabiner/karabiner.json` 本体を chezmoi で直接管理し, 以下のルールを有効化済みの状態で配布しています. `chezmoi apply` だけで即適用されます (GUI での手動有効化は不要).
 
-初回のみ手動で有効化が必要:
+- **Caps Lock → Control**: Caps Lock を Control キーとして使う
+- **左右 Command 単押しで英数/かな** (US キーボード向け): 左 Command 単押しで英数, 右 Command 単押しでかな. 他キー併用時は通常の Command として動作
 
-1. Karabiner-Elements を起動し, アクセシビリティ等の権限を付与
-2. Preferences → Complex Modifications → Add predefined rule → "Command 単押しで英数/かな切り替え" を Enable
+初回のみ Karabiner-Elements を起動してアクセシビリティ等の権限を付与する必要があります.
 
-`~/.config/karabiner/karabiner.json` 本体は GUI 操作で差分が出やすいため意図的に chezmoi 管理外としています.
+各ルールは GUI から個別に取り込める complex modification としても `dot_config/karabiner/assets/complex_modifications/` に置いてあります.
+
+> 注意: Karabiner GUI で設定を変更すると `karabiner.json` が書き換わり chezmoi 差分が出ます. その場合は `chezmoi re-add ~/.config/karabiner/karabiner.json` で取り込むか, `chezmoi apply` で管理状態へ戻してください.
 
 ## ローカル上書き
 

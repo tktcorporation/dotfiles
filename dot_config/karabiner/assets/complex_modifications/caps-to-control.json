@@ -1,0 +1,18 @@
+{
+  "title": "Caps Lock を Control に変更",
+  "rules": [
+    {
+      "description": "Caps Lock を Control として使う",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "caps_lock",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [{ "key_code": "left_control" }]
+        }
+      ]
+    }
+  ]
+}
