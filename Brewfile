@@ -46,6 +46,10 @@ if OS.mac?
   # ─── Browsers ───
   cask "arc"
   cask "google-chrome"
+  # chromium は 2026-09-01 に Homebrew cask 側で disable 予定
+  # (fails_gatekeeper_check)。宣言してもその後の brew bundle が
+  # 時限爆弾的に失敗するため、Brewfile管理には含めない
+  # (Codex review PR #102 で指摘)。
 
   # ─── Communication ───
   cask "slack"

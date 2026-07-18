@@ -54,20 +54,33 @@ else
 fi
 
 # ── Brewfile 管理外パッケージの検知 (drift warning) ──────────────
-# Brewfile に無い formula/cask (例: 過去に手動 `brew install node` した野良
-# インストール) は brew upgrade で追従されず放置される。依存ライブラリ
-# (icu4c 等) だけが先に上がると ABI 不整合で dyld エラーになることがある
-# (例: node が `Library not loaded: .../libicui18n.74.dylib` で起動不能)。
+# Brewfileを宣言的な単一情報源に寄せる方針のもと、Brewfileに無い formula/cask
+# (例: 過去に手動 `brew install node` した野良インストール) を検知して警告する。
+# 実際に削除するかどうかはユーザー判断に委ねる (無関係な手動インストールを
+# 誤って消さないため。--force は自動実行しない)。
 #
-# `brew bundle cleanup` (--force 無し) は削除を実行せず候補を表示するだけ
-# なので、ここでは検知・警告に留め、実際に消すかどうかはユーザーの判断に
-# 委ねる (無関係な手動インストールを誤って消さないため)。
+# 典型例: node は mise 管理する設計 (dot_config/mise/config.toml 参照) で
+# Brewfileには含めていない。Homebrew版nodeが残っていると `brew upgrade` で
+# icu4c 等の依存だけ先に上がりABI不整合を起こし、
+# `dyld: Library not loaded: .../libicui18n.74.dylib` で起動不能になる。
 #
 # --no-mas necessary: brew bundle cleanup はデフォルトで Mac App Store (mas)
 # アプリも管理対象に含める。この Brewfile の mas エントリは Xcode 1つだけ
 # なので、--no-mas を付けないと「Brewfile に無い」他の App Store アプリまで
 # 警告・削除候補に出てしまう (Codex review PR #101 で指摘)。
-CLEANUP_PREVIEW="$(brew bundle cleanup --no-mas --file="$CLEANUP_BREWFILE" 2>&1 || true)"
+#
+# ただし --no-mas は Homebrew のバージョンによっては cleanup サブコマンドに
+# 存在せず `Error: invalid option: --no-mas` で即失敗する個体差が実機で確認
+# された (この場合 `|| true` で握りつぶされ、警告自体が一切出ない致命的な
+# 回帰になっていた)。そのため一度 --no-mas 付きで試し、未対応なら外して
+# 再実行する。
+# shellcheck disable=SC2086 # CLEANUP_NO_MAS は "--no-mas" か空文字のみを保持する制御値
+CLEANUP_NO_MAS="--no-mas"
+CLEANUP_PREVIEW="$(brew bundle cleanup $CLEANUP_NO_MAS --file="$CLEANUP_BREWFILE" 2>&1)" && CLEANUP_STATUS=0 || CLEANUP_STATUS=$?
+if [ "$CLEANUP_STATUS" -ne 0 ] && printf '%s\n' "$CLEANUP_PREVIEW" | grep -qi 'invalid option'; then
+    CLEANUP_NO_MAS=""
+    CLEANUP_PREVIEW="$(brew bundle cleanup --file="$CLEANUP_BREWFILE" 2>&1 || true)"
+fi
 if printf '%s\n' "$CLEANUP_PREVIEW" | grep -q '^Would '; then
     cat <<EOF
 
@@ -75,8 +88,12 @@ if printf '%s\n' "$CLEANUP_PREVIEW" | grep -q '^Would '; then
 $CLEANUP_PREVIEW
 
     これらは Brewfile 管理外のため brew upgrade で追従されず、依存ライブラリ
-    とのバージョン不整合で壊れることがあります。
-    削除する場合: brew bundle cleanup --force --no-mas --file="$BREWFILE"
+    とのバージョン不整合で壊れることがあります (node が典型例)。
+    注意: brew bundle cleanup の依存解決には既知の不具合があり、ffmpeg/gnupg
+    等 Brewfile に書いてある formula の正当な依存ライブラリまで誤って一覧に
+    出ることがある (brew update しても再現)。--force で実際に削除する前に、
+    このリストを必ず自分の目で確認すること。
+    削除する場合: brew bundle cleanup --force $CLEANUP_NO_MAS --file="$BREWFILE"
     残したい場合は Brewfile に追記して管理下に置いてください。
 
 EOF
