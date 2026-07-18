@@ -62,7 +62,12 @@ fi
 # `brew bundle cleanup` (--force 無し) は削除を実行せず候補を表示するだけ
 # なので、ここでは検知・警告に留め、実際に消すかどうかはユーザーの判断に
 # 委ねる (無関係な手動インストールを誤って消さないため)。
-CLEANUP_PREVIEW="$(brew bundle cleanup --file="$CLEANUP_BREWFILE" 2>&1 || true)"
+#
+# --no-mas necessary: brew bundle cleanup はデフォルトで Mac App Store (mas)
+# アプリも管理対象に含める。この Brewfile の mas エントリは Xcode 1つだけ
+# なので、--no-mas を付けないと「Brewfile に無い」他の App Store アプリまで
+# 警告・削除候補に出てしまう (Codex review PR #101 で指摘)。
+CLEANUP_PREVIEW="$(brew bundle cleanup --no-mas --file="$CLEANUP_BREWFILE" 2>&1 || true)"
 if printf '%s\n' "$CLEANUP_PREVIEW" | grep -q '^Would '; then
     cat <<EOF
 
@@ -71,7 +76,7 @@ $CLEANUP_PREVIEW
 
     これらは Brewfile 管理外のため brew upgrade で追従されず、依存ライブラリ
     とのバージョン不整合で壊れることがあります。
-    削除する場合: brew bundle cleanup --force --file="$BREWFILE"
+    削除する場合: brew bundle cleanup --force --no-mas --file="$BREWFILE"
     残したい場合は Brewfile に追記して管理下に置いてください。
 
 EOF
