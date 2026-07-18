@@ -41,6 +41,7 @@ fi
 echo "Running brew bundle..."
 if [ "$MAS_SIGNED_IN" = true ]; then
     brew bundle --file="$BREWFILE"
+    CLEANUP_BREWFILE="$BREWFILE"
 else
     if grep -q '^[[:space:]]*mas ' "$BREWFILE" 2>/dev/null; then
         echo "==> [SKIP] Mac App Store 未サインインのため mas パッケージはスキップします"
@@ -49,4 +50,29 @@ else
     TMPBREWFILE=$(mktemp)
     grep -v '^[[:space:]]*mas ' "$BREWFILE" > "$TMPBREWFILE"
     brew bundle --file="$TMPBREWFILE"
+    CLEANUP_BREWFILE="$TMPBREWFILE"
+fi
+
+# ── Brewfile 管理外パッケージの検知 (drift warning) ──────────────
+# Brewfile に無い formula/cask (例: 過去に手動 `brew install node` した野良
+# インストール) は brew upgrade で追従されず放置される。依存ライブラリ
+# (icu4c 等) だけが先に上がると ABI 不整合で dyld エラーになることがある
+# (例: node が `Library not loaded: .../libicui18n.74.dylib` で起動不能)。
+#
+# `brew bundle cleanup` (--force 無し) は削除を実行せず候補を表示するだけ
+# なので、ここでは検知・警告に留め、実際に消すかどうかはユーザーの判断に
+# 委ねる (無関係な手動インストールを誤って消さないため)。
+CLEANUP_PREVIEW="$(brew bundle cleanup --file="$CLEANUP_BREWFILE" 2>&1 || true)"
+if printf '%s\n' "$CLEANUP_PREVIEW" | grep -q '^Would '; then
+    cat <<EOF
+
+==> [WARN] Brewfile に無い Homebrew パッケージが見つかりました:
+$CLEANUP_PREVIEW
+
+    これらは Brewfile 管理外のため brew upgrade で追従されず、依存ライブラリ
+    とのバージョン不整合で壊れることがあります。
+    削除する場合: brew bundle cleanup --force --file="$BREWFILE"
+    残したい場合は Brewfile に追記して管理下に置いてください。
+
+EOF
 fi
