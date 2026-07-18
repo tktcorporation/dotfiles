@@ -10,6 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Update Homebrew
+        # macos-latest ランナーの Homebrew はイメージビルド時点のタップスナップショットを
+        # 保持しているため、brew update せずに brew info を呼ぶとイメージ後に追加された
+        # formula/cask を「存在しない」と誤判定することがある (例: notion-mail, PR #100)。
+        run: brew update
+
       - name: Check formulae exist
         run: |
           errors=0
