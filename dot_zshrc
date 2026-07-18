@@ -10,6 +10,13 @@ setopt hist_ignore_space
 autoload -Uz compinit && compinit
 
 # ─── Runtime Manager ───
+# mise公式のtroubleshooting「The wrong version of a tool is being used」対策。
+# 通常のactivateだけだと、Homebrew版node等が(brew shellenvが.zprofileで先に
+# PATHに入るせいで)mise管理のnodeより優先されてしまうケースが実機で確認された
+# (icu4c ABI不整合でnodeがdyldエラーになった一因)。aggressiveモードで毎回
+# 強制的にmiseのパスをPATH先頭に割り込ませる。
+# 参照: https://github.com/jdx/mise/blob/main/docs/troubleshooting.md
+export MISE_ACTIVATE_AGGRESSIVE=1
 eval "$(mise activate zsh)"
 
 # ─── Tools ───
