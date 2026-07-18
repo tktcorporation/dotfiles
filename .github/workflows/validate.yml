@@ -12,9 +12,24 @@ jobs:
 
       - name: Check formulae exist
         run: |
+          # brew info は稀にネットワーク起因で一時的に失敗することが実際に
+          # 観測されている (実在するdirenv/zoxideが1回目はどちらも、2回目は
+          # direnvのみ「見つからない」と誤検知され、CIが再現性なく落ちた)。
+          # 本当に存在しないformulaと一時的な失敗を区別するため、数回リトライ
+          # してから諦める。
+          check_exists_with_retry() {
+            for _ in 1 2 3; do
+              if "$@" &>/dev/null; then
+                return 0
+              fi
+              sleep 5
+            done
+            return 1
+          }
+
           errors=0
           while IFS= read -r formula; do
-            if ! brew info "$formula" &>/dev/null; then
+            if ! check_exists_with_retry brew info "$formula"; then
               echo "::error::Formula not found: $formula"
               errors=$((errors + 1))
             fi
@@ -28,9 +43,20 @@ jobs:
 
       - name: Check casks exist
         run: |
+          # 理由は上の「Check formulae exist」と同じ (brew infoの一時的な失敗対策)。
+          check_exists_with_retry() {
+            for _ in 1 2 3; do
+              if "$@" &>/dev/null; then
+                return 0
+              fi
+              sleep 5
+            done
+            return 1
+          }
+
           errors=0
           while IFS= read -r cask; do
-            if ! brew info --cask "$cask" &>/dev/null; then
+            if ! check_exists_with_retry brew info --cask "$cask"; then
               echo "::error::Cask not found: $cask"
               errors=$((errors + 1))
             fi
