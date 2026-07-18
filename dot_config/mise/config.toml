@@ -1,3 +1,6 @@
+# ユーザー環境 (chezmoi apply で ~/.config/mise/config.toml に展開) へ配布するランタイム設定。
+# このリポジトリ自身の開発環境用の設定は .mise.toml (リポジトリルート) で別管理している。
+# 配布先はバージョンを厳密ピンする一方、リポジトリ開発用は幅を持たせている。意図的な分離であり統合しない。
 [tools]
 node = "22"
 "npm:@anthropic-ai/claude-code" = "latest"

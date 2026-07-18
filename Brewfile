@@ -1,3 +1,8 @@
+# macOS ローカル環境全体 (CLI ツール + GUI cask) 向けの宣言的パッケージリスト。
+# .devcontainer/devcontainer.json の onCreateCommand (apt-get) とはパッケージマネージャー
+# (brew vs apt)・対象環境 (macOS vs Linux コンテナ)・目的が異なるため意図的に別管理しており、
+# 共有マニフェスト化はしない (パッケージ名が brew/apt で一致するとも限らない)。
+
 # ─── Core CLI Tools ───
 brew "chezmoi"
 brew "gh"
