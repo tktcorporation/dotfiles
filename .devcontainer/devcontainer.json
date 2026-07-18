@@ -82,6 +82,8 @@
     }
   },
   "onCreateCommand": {
+    // Linux devcontainer に最小限必要な CLI ツール。macOS ローカル環境全体を管理する Brewfile とは
+    // パッケージマネージャー(apt vs brew)・対象環境・目的が異なるため意図的に別管理している(統合しない)。
     "install-packages": [
       "bash",
       "-c",

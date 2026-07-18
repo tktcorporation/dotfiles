@@ -1,3 +1,7 @@
+# このリポジトリ自身の開発環境用の設定 (dotfiles リポジトリの開発・CI で使う node/python 等)。
+# ユーザー環境へ配布するランタイム設定は dot_config/mise/config.toml
+# (chezmoi 経由で ~/.config/mise/config.toml に展開) で別管理している。
+# 対象読者・要求バージョン精度が異なる (こちらは幅を持たせた指定) ため意図的に分離しており、統合はしない。
 [tools]
 node = ["22", "24"]
 uv = "latest"
