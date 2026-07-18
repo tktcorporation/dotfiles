@@ -41,6 +41,7 @@ if OS.mac?
   # ─── Browsers ───
   cask "arc"
   cask "google-chrome"
+  cask "chromium"
 
   # ─── Communication ───
   cask "slack"
