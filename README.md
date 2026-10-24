@@ -64,7 +64,7 @@ dot_config/karabiner/assets/complex_modifications/caps-to-control.json
                                              # Karabiner: Caps Lock を Control に変更 (GUI 取込用)
 run_onchange_before_install-packages.sh.tmpl # Brewfile 変更時に自動で brew bundle
 run_once_after_macos-defaults.sh.tmpl        # macOS 初回セットアップ時のシステム設定
-run_onchange_after_setup-tools.sh.tmpl       # mise config 変更時にランタイムインストール
+run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導入し範囲内の最新へ追従
 ```
 
 ## パッケージ管理
@@ -76,7 +76,7 @@ run_onchange_after_setup-tools.sh.tmpl       # mise config 変更時にランタ
 ## ランタイム管理
 
 [mise](https://mise.jdx.dev/) で node, python, bun, pnpm, uv 等を一元管理しています.
-`dot_config/mise/config.toml` を編集して `chezmoi apply` すると自動で `mise install` が走ります.
+`chezmoi apply` のたびに `mise install` と `mise upgrade` が走り, `dot_config/mise/config.toml` に書いた範囲 (`node = "lts"`, `pnpm = "11"` 等) の中で最新版へ追従します. 古いバージョンに固定したまま忘れてセキュリティ修正を取りこぼさないよう, 厳密なバージョン固定はしていません. メジャーを上げたいときは範囲自体を編集します.
 
 ## 1Password 連携
 
@@ -100,7 +100,7 @@ run_onchange_after_setup-tools.sh.tmpl       # mise config 変更時にランタ
 
 一見重複に見えるが、対象や実行タイミングが異なるため意図的に分けている設定. 統合すると差異吸収の抽象化が必要になり複雑さが増すため, あえて一本化しない.
 
-- **`.mise.toml`（リポジトリ自身の開発用） vs `dot_config/mise/config.toml`（配布先ユーザー環境用）**: 前者はこの dotfiles リポジトリ自体の開発・CI で使うランタイム設定（幅を持たせたバージョン指定）, 後者は `chezmoi apply` で `~/.config/mise/config.toml` に展開されるユーザー環境向け設定（厳密ピン）. 対象読者が違う.
+- **`.mise.toml`（リポジトリ自身の開発用） vs `dot_config/mise/config.toml`（配布先ユーザー環境用）**: 前者はこの dotfiles リポジトリ自体の開発・CI で使うランタイム設定（幅を持たせたバージョン指定）, 後者は `chezmoi apply` で `~/.config/mise/config.toml` に展開されるユーザー環境向け設定（メジャー等の範囲指定. apply 毎に範囲内の最新へ追従）. 対象読者が違う.
 - **`scripts/bootstrap-lib.sh` の二重取得経路**: `setup.sh` は `curl | bash` 実行時点でリポジトリが未クローンのためリモートから curl 取得し, `run_onchange_*.sh.tmpl` は chezmoi sourceDir から直接読む. 実行タイミングの制約による必然的な分岐で, リビジョンずれは `setup.sh` 側の関数存在チェックで検知する.
 - **`Brewfile`（macOS ローカル環境全体） vs `.devcontainer/devcontainer.json` の `onCreateCommand`（Linux コンテナ最小限）**: パッケージマネージャー（brew/apt）・対象環境・目的が異なる. パッケージ名も両者で一致するとは限らないため共有マニフェスト化しない.
 

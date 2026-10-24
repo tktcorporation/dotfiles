@@ -3,13 +3,15 @@
 # (chezmoi 経由で ~/.config/mise/config.toml に展開) で別管理している。
 # 対象読者・要求バージョン精度が異なる (こちらは幅を持たせた指定) ため意図的に分離しており、統合はしない。
 [tools]
-node = ["22", "24"]
+node = ["24", "26"]
 uv = "latest"
 python = "3.14"
-pnpm = "10"
-jj = "latest"
+pnpm = "11"
 
-"npm:@anthropic-ai/claude-code" = "latest"
+# Claude Code は npm 版ではなく公式ネイティブバイナリを使う (mise registry の claude =
+# aqua:anthropics/claude-code で GitHub Releases の単体バイナリを取得)。
+# Anthropic が npm 配布より native install を推奨しており、Node のバージョンにも依存しないため。
+claude = "latest"
 "npm:@openai/codex" = "latest"
 "npm:@google/gemini-cli" = "latest"
 
