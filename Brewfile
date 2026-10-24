@@ -32,6 +32,11 @@ brew "exiftool"
 brew "cloudflared"
 brew "clamav"
 
+# ─── Cloud ───
+# EC2 への SSH は Session Manager 経由 (aws ssm start-session) で行うため
+# awscli と session-manager-plugin をセットで入れる。
+brew "awscli"
+
 if OS.mac?
   # ─── Essentials ───
   cask "1password"
@@ -42,6 +47,7 @@ if OS.mac?
   cask "ghostty"
   cask "warp"
   cask "visual-studio-code"
+  cask "cursor"
 
   # ─── Browsers ───
   cask "arc"
@@ -65,6 +71,7 @@ if OS.mac?
   cask "orbstack"
   cask "cloudflare-warp"
   cask "tailscale-app"
+  cask "session-manager-plugin"
 
   # ─── Creative / Media ───
   cask "screen-studio"

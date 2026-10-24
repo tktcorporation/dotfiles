@@ -9,7 +9,10 @@ python = "3.14"
 pnpm = "10"
 jj = "latest"
 
-"npm:@anthropic-ai/claude-code" = "latest"
+# Claude Code は npm 版ではなく公式ネイティブバイナリを使う (mise registry の claude =
+# aqua:anthropics/claude-code で GitHub Releases の単体バイナリを取得)。
+# Anthropic が npm 配布より native install を推奨しており、Node のバージョンにも依存しないため。
+claude = "latest"
 "npm:@openai/codex" = "latest"
 "npm:@google/gemini-cli" = "latest"
 

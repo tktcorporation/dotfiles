@@ -3,7 +3,10 @@
 # 配布先はバージョンを厳密ピンする一方、リポジトリ開発用は幅を持たせている。意図的な分離であり統合しない。
 [tools]
 node = "22"
-"npm:@anthropic-ai/claude-code" = "latest"
+# Claude Code は npm 版ではなく公式ネイティブバイナリを使う (mise registry の claude =
+# aqua:anthropics/claude-code で GitHub Releases の単体バイナリを取得)。
+# Anthropic が npm 配布より native install を推奨しており、Node のバージョンにも依存しないため。
+claude = "latest"
 "npm:@devcontainers/cli" = "0.81.1"
 "npm:@antfu/ni" = "27.0.1"
 bun = "1.3.5"
