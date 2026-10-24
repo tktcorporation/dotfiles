@@ -64,7 +64,7 @@ if OS.mac?
   # ─── Dev Infrastructure ───
   cask "orbstack"
   cask "cloudflare-warp"
-  cask "tailscale"
+  cask "tailscale-app"
 
   # ─── Creative / Media ───
   cask "screen-studio"
