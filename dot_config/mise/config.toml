@@ -1,15 +1,20 @@
 # ユーザー環境 (chezmoi apply で ~/.config/mise/config.toml に展開) へ配布するランタイム設定。
 # このリポジトリ自身の開発環境用の設定は .mise.toml (リポジトリルート) で別管理している。
-# 配布先はバージョンを厳密ピンする一方、リポジトリ開発用は幅を持たせている。意図的な分離であり統合しない。
+# 対象読者・用途が異なるため意図的に分離しており統合しない。
+#
+# バージョンは厳密ピンせず、メジャー (またはマイナー) の範囲だけを指定する。
+# 過去に固定したまま忘れてセキュリティ修正を取りこぼすのを防ぐため。
+# 範囲内の最新パッチへの追従は run_after_upgrade-tools.sh.tmpl が apply のたびに行う。
 [tools]
-node = "22"
+# 最新の LTS に自動追従する (現在は 24。26 が LTS 入りすると apply 時に 26 へ上がる)。
+node = "lts"
 # Claude Code は npm 版ではなく公式ネイティブバイナリを使う (mise registry の claude =
 # aqua:anthropics/claude-code で GitHub Releases の単体バイナリを取得)。
 # Anthropic が npm 配布より native install を推奨しており、Node のバージョンにも依存しないため。
 claude = "latest"
-"npm:@devcontainers/cli" = "0.81.1"
-"npm:@antfu/ni" = "27.0.1"
-bun = "1.3.5"
-pnpm = "10.25.0"
-python = "3.14.2"
-uv = "0.9.6"
+"npm:@devcontainers/cli" = "latest"
+"npm:@antfu/ni" = "latest"
+bun = "1"
+pnpm = "11"
+python = "3.14"
+uv = "latest"

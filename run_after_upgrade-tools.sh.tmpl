@@ -1,0 +1,15 @@
+#!/bin/bash
+# mise 管理のランタイム/CLI を導入し、config.toml の範囲内で最新版へ追従させる。
+#
+# run_onchange ではなく run_after (apply 毎に実行) にしているのは、config.toml を
+# 範囲指定 (node = "lts", pnpm = "11" 等) にしたため。設定ファイルが変わらなくても
+# 上流でセキュリティ修正が出たら次の apply で取り込みたい。
+# `mise upgrade` は範囲を越えない (メジャーを勝手に上げない) ので apply 毎でも安全。
+# 範囲自体を上げたいときは config.toml を編集する。
+set -euo pipefail
+
+if command -v mise &>/dev/null; then
+  echo "Installing / upgrading mise-managed tools..."
+  mise install --yes
+  mise upgrade --yes
+fi
