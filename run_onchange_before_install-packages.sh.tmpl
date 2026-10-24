@@ -40,30 +40,20 @@ load_brew_shellenv
 # 非ログインシェルから apply された場合でも効くよう、ここでも明示する。
 export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
 
-# ── mas (Mac App Store) サインイン状態チェック ──────────────────
-# mas install は Apple ID 認証（sudo とは別）が必要。
-# 未サインインだと予期しないパスワードプロンプトが出るため、
-# 事前にチェックし、未サインインなら mas 行を除外して実行する。
+# ── brew bundle (mas 行を除く) ─────────────────────────────────
+# Mac App Store アプリ (mas 行) は run_after_install-mas-apps.sh.tmpl で別に入れる。
+# 以前はここで `mas account` によりサインイン判定していたが、mas 7 で account
+# サブコマンドが削除され常に「未サインイン」扱いになっていた (Xcode が新規環境で
+# 一切入らない)。さらにこのスクリプトは run_onchange なので、スキップした mas 行は
+# Brewfile が変わるまで再試行されなかった。mas は未サインイン時に失敗するだけで
+# 判定 API も無いため、apply 毎に「未導入の分だけ試し、失敗は警告」に分離した。
 BREWFILE={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
-MAS_SIGNED_IN=false
-if command -v mas &>/dev/null && mas account &>/dev/null; then
-    MAS_SIGNED_IN=true
-fi
+TMPBREWFILE=$(mktemp)
+grep -v '^[[:space:]]*mas ' "$BREWFILE" > "$TMPBREWFILE"
 
 echo "Running brew bundle..."
-if [ "$MAS_SIGNED_IN" = true ]; then
-    brew bundle --file="$BREWFILE"
-    CLEANUP_BREWFILE="$BREWFILE"
-else
-    if grep -q '^[[:space:]]*mas ' "$BREWFILE" 2>/dev/null; then
-        echo "==> [SKIP] Mac App Store 未サインインのため mas パッケージはスキップします"
-        echo "    App Store にサインイン後、chezmoi apply を再実行してください"
-    fi
-    TMPBREWFILE=$(mktemp)
-    grep -v '^[[:space:]]*mas ' "$BREWFILE" > "$TMPBREWFILE"
-    brew bundle --file="$TMPBREWFILE"
-    CLEANUP_BREWFILE="$TMPBREWFILE"
-fi
+brew bundle --file="$TMPBREWFILE"
+CLEANUP_BREWFILE="$TMPBREWFILE"
 
 # ── Brewfile 管理外パッケージの検知 (drift warning) ──────────────
 # Brewfileを宣言的な単一情報源に寄せる方針のもと、Brewfileに無い formula/cask
@@ -105,8 +95,15 @@ $CLEANUP_PREVIEW
     等 Brewfile に書いてある formula の正当な依存ライブラリまで誤って一覧に
     出ることがある (brew update しても再現)。--force で実際に削除する前に、
     このリストを必ず自分の目で確認すること。
-    削除する場合: brew bundle cleanup --force $CLEANUP_NO_MAS --file="$BREWFILE"
     残したい場合は Brewfile に追記して管理下に置いてください。
-
 EOF
+    # --no-mas が使えない Homebrew では cleanup --force が Brewfile 外の App Store
+    # アプリまで削除してしまうため、一括削除コマンドは案内しない (Codex review)。
+    if [ -n "$CLEANUP_NO_MAS" ]; then
+        echo "    削除する場合: brew bundle cleanup --force $CLEANUP_NO_MAS --file=\"$BREWFILE\""
+    else
+        echo "    削除する場合: この Homebrew は --no-mas 非対応のため cleanup --force は使わず、"
+        echo "    不要なものを個別に brew uninstall してください (App Store アプリまで消えるため)。"
+    fi
+    echo
 fi

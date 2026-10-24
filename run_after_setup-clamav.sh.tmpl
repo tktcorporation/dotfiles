@@ -5,7 +5,16 @@ set -euo pipefail
 # 1) freshclam.conf / clamd.conf を sample から生成する（無ければ）
 # 2) 定義 DB が空なら freshclam を走らせて初期取得する
 #
-# Brewfile hash: {{ include "Brewfile" | sha256sum }}
+# run_onchange ではなく run_after (apply 毎) にしているのは、初回取得に失敗したとき
+# 次の apply で再試行させるため (run_onchange だと Brewfile が変わるまで再実行されない)。
+# どちらの処理も「無いときだけ」動くので、揃っていれば apply 毎でもほぼ何もしない。
+# 定義の定期更新は手動 (`freshclam`) で行う運用にしている。
+
+# 兄弟スクリプト (install-packages) の load_brew_shellenv は別プロセスなので PATH が
+# 引き継がれない。初回 bootstrap など brew が PATH に無い環境でも動くよう、ここでも読み込む。
+# shellcheck source=scripts/bootstrap-lib.sh
+source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
+load_brew_shellenv
 
 if ! command -v brew >/dev/null 2>&1; then
   echo "==> [SKIP] brew が見つからないため clamav セットアップをスキップします"
@@ -41,7 +50,7 @@ init_conf_from_sample clamd.conf
 
 # 定義 DB が空のときだけ初期ダウンロードする（数分・~250MB）。
 # 既に DB があれば freshclam を毎回叩かない（apply 時間が伸びるのを防ぐ）。
-# 定期更新したい場合は別途 launchd/cron で `freshclam` を回すこと。
+# 失敗しても apply 全体は止めない (警告のみ)。DB は空のままなので次の apply で再試行される。
 if [ -z "$(ls -A "$CLAMAV_DB" 2>/dev/null)" ]; then
   echo "==> Downloading initial ClamAV virus database (数分かかります)"
   if ! freshclam; then

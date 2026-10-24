@@ -1,0 +1,46 @@
+#!/bin/bash
+{{ if eq .chezmoi.os "darwin" -}}
+# Brewfile の mas 行 (Mac App Store アプリ) のうち、未インストールのものだけを入れる。
+#
+# brew bundle から分離している理由 (run_onchange_before_install-packages.sh.tmpl 参照):
+#   - mas 7 には App Store のサインイン状態を調べる手段が無く、未サインインだと
+#     mas install が失敗するだけ。brew bundle に混ぜると apply 全体が止まる。
+#   - run_onchange だと一度スキップした分が Brewfile 変更まで再試行されない。
+# そのため run_after (apply 毎) にし、`mas list` で導入済みを除いた分だけ試す。
+# 全部入っていれば mas list 1 回で終わるので apply 毎でも軽い。失敗は警告に留める。
+set -uo pipefail
+
+# 兄弟スクリプト (install-packages) の load_brew_shellenv は別プロセスなので PATH が
+# 引き継がれない。初回 bootstrap など brew が PATH に無い環境でも動くよう、ここでも読み込む。
+# shellcheck source=scripts/bootstrap-lib.sh
+source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
+load_brew_shellenv
+
+BREWFILE={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
+
+if ! command -v mas >/dev/null 2>&1; then
+    echo "==> [SKIP] mas が見つからないため Mac App Store アプリの導入をスキップします"
+    exit 0
+fi
+
+# 例: `  mas "Xcode", id: 497799835` → "497799835 Xcode"
+WANTED="$(sed -nE 's/^[[:space:]]*mas[[:space:]]+"([^"]+)",[[:space:]]*id:[[:space:]]*([0-9]+).*/\2 \1/p' "$BREWFILE")"
+[ -z "$WANTED" ] && exit 0
+
+INSTALLED_IDS="$(mas list 2>/dev/null | awk '{print $1}')"
+
+while read -r id name; do
+    if printf '%s\n' "$INSTALLED_IDS" | grep -qx "$id"; then
+        continue
+    fi
+    echo "==> Installing $name from Mac App Store (id: $id)..."
+    # mas install は「入手済み (購入履歴にある)」アプリしか入れられないため、
+    # 新しい Apple Account で初めて入れる無料アプリ (Xcode 等) は mas get で入手する。
+    # どちらも root 権限が必要 (mas help install / mas help get)。
+    if ! sudo mas install "$id" && ! sudo mas get "$id"; then
+        echo "==> [WARN] $name のインストールに失敗しました。App Store にサインインし、"
+        echo "    有料アプリなら App Store で購入してから、もう一度 chezmoi apply してください"
+        echo "    (次回の apply で自動的に再試行されます)。"
+    fi
+done <<< "$WANTED"
+{{ end -}}

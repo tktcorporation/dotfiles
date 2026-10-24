@@ -14,6 +14,12 @@ set -euo pipefail
 # npm 実行に [env] が渡る保証がない (初回 bootstrap 時は mise 自体が未有効化) ため、ここでも明示する。
 export npm_config_min_release_age=0.5
 
+# 兄弟スクリプト (install-packages) の load_brew_shellenv は別プロセスなので PATH が
+# 引き継がれない。初回 bootstrap など brew が PATH に無い環境でも動くよう、ここでも読み込む。
+# shellcheck source=scripts/bootstrap-lib.sh
+source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
+load_brew_shellenv
+
 if command -v mise &>/dev/null; then
   echo "Installing / upgrading mise-managed tools..."
   mise install --yes

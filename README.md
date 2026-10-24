@@ -62,8 +62,10 @@ dot_config/karabiner/assets/complex_modifications/cmd-eisuu-kana.json
                                              # Karabiner: 左右Command 単押しで英数/かな切り替え (GUI 取込用)
 dot_config/karabiner/assets/complex_modifications/caps-to-control.json
                                              # Karabiner: Caps Lock を Control に変更 (GUI 取込用)
-run_onchange_before_install-packages.sh.tmpl # Brewfile 変更時に自動で brew bundle
-run_once_after_macos-defaults.sh.tmpl        # macOS 初回セットアップ時のシステム設定
+run_onchange_before_install-packages.sh.tmpl # Brewfile 変更時に自動で brew bundle (mas 行を除く)
+run_after_install-mas-apps.sh.tmpl           # apply 毎に未導入の Mac App Store アプリだけ導入 (失敗は警告)
+run_after_setup-clamav.sh.tmpl               # apply 毎に ClamAV 設定と初回定義 DB を用意 (揃っていれば何もしない)
+run_onchange_after_macos-defaults.sh.tmpl    # macOS のシステム設定 (設定内容が変わったときに再適用)
 run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導入し範囲内の最新へ追従
 ```
 
