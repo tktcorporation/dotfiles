@@ -14,10 +14,5 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 # brew でまとめて上げたいときは `brew upgrade --greedy` で上書きできる。
 export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
 
-# npm のサプライチェーン攻撃対策のクールダウン: 公開から 12 時間 (0.5 日) 未満のバージョンは入れない。
-# ~/.npmrc は npm login でトークンが書き込まれるため chezmoi では管理せず、環境変数で設定する。
-# 方針と例外手順は README の「サプライチェーン対策」を参照。
-export npm_config_min_release_age=0.5
-
 # OrbStack shell integration (if installed)
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :

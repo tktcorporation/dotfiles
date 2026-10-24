@@ -8,8 +8,3 @@ scripts
 .gitignore
 CLAUDE.md
 .claude
-
-{{- /* ~/Library 配下 (pnpm のグローバル設定など) は macOS 専用のパス */}}
-{{ if ne .chezmoi.os "darwin" }}
-Library
-{{ end }}
