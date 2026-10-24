@@ -8,6 +8,12 @@
 # 範囲自体を上げたいときは config.toml を編集する。
 set -euo pipefail
 
+# mise の npm バックエンド (npm:@devcontainers/cli 等) が依存を解決するときにも
+# npm のクールダウン (README「サプライチェーン対策」) を効かせる。
+# ~/.zprofile にも同じ設定があるが、apply 中のプロセスには新しい .zprofile が
+# 読み込まれていない (初回 bootstrap / 既存シェルからの apply) ため、ここでも明示する。
+export npm_config_min_release_age=0.5
+
 if command -v mise &>/dev/null; then
   echo "Installing / upgrading mise-managed tools..."
   mise install --yes

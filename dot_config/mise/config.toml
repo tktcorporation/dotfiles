@@ -18,3 +18,8 @@ bun = "1"
 pnpm = "11"
 python = "3.14"
 uv = "latest"
+
+[settings]
+# サプライチェーン攻撃対策のクールダウン: 公開から 12 時間未満のバージョンは install/upgrade しない。
+# 方針と例外手順は README の「サプライチェーン対策」を参照。
+minimum_release_age = "12h"

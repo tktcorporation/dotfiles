@@ -78,6 +78,31 @@ run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導
 [mise](https://mise.jdx.dev/) で node, python, bun, pnpm, uv 等を一元管理しています.
 `chezmoi apply` のたびに `mise install` と `mise upgrade` が走り, `dot_config/mise/config.toml` に書いた範囲 (`node = "lts"`, `pnpm = "11"` 等) の中で最新版へ追従します. 古いバージョンに固定したまま忘れてセキュリティ修正を取りこぼさないよう, 厳密なバージョン固定はしていません. メジャーを上げたいときは範囲自体を編集します.
 
+## サプライチェーン対策 (12 時間クールダウン)
+
+バージョンを固定せず最新に追従する代わりに, **公開から 12 時間未満のバージョンは入れない** ようにしています. 乗っ取られたパッケージの悪性バージョン (ワーム等) は公開後数時間で検知・取り下げられることが多く, その間に巻き込まれるのを避けるためです.
+
+| ツール | 設定 (chezmoi 管理) | 一時的にクールダウンを外すコマンド |
+|---|---|---|
+| mise | `dot_config/mise/config.toml` の `minimum_release_age = "12h"` | `mise upgrade --minimum-release-age 0s <tool>` |
+| pnpm | `Library/Preferences/pnpm/config.yaml` の `minimumReleaseAge: 720` (分) | `pnpm add <pkg> --config.minimum-release-age=0` |
+| npm | `dot_zprofile.tmpl` の `npm_config_min_release_age=0.5` (日) | `npm install <pkg> --min-release-age=0` |
+| bun | `dot_bunfig.toml` の `minimumReleaseAge = 43200` (秒) | `bun add <pkg> --minimum-release-age=0` |
+| uv | `dot_config/uv/uv.toml` の `exclude-newer = "12 hours"` | `uv pip install <pkg> --exclude-newer "$(date -u +%Y-%m-%dT%H:%M:%SZ)"` |
+
+Homebrew には同等の機能がありません. 自己更新する cask はベンダーの updater に任せており (上記「パッケージ管理」), formula は Homebrew の CI がビルドした bottle を使います.
+
+### 例外 (重要なセキュリティ修正をすぐ入れたいとき)
+
+クールダウンを待つより修正を入れる方が優先なケースがあります (悪用中の脆弱性の修正など). その場合は **設定は変えずに**, 上表のコマンドで対象の 1 つだけを一時的に入れます. 入れる前に次を確認します.
+
+1. 修正対象の脆弱性が実在し深刻か (GitHub Security Advisory / CVE / 公式アナウンス)
+2. そのリリースが正規のメンテナから出ているか (公式リポジトリのタグ・リリースノート, npm の provenance 等)
+3. そのバージョン自体に乗っ取り・不審な挙動の報告がないか
+4. 差分が修正内容に見合っているか (不自然な依存追加や install スクリプトの追加がないか)
+
+AI エージェントに作業させる場合も同じ手順で調べさせ, 根拠を示したうえで人が許可してから実行します.
+
 ## 1Password 連携
 
 - **SSH agent**: `~/.ssh/config` に OS に応じた `IdentityAgent` を自動設定
