@@ -20,6 +20,10 @@
 # セットアップ中に複数の sudo コマンドが走ってもパスワード入力を
 # 求められないようにする (ヘッドレス実行でも通るようにするため)。
 #
+# 使うのは setup.sh (初回 bootstrap) だけ。維持している間は同じユーザーの
+# 他プロセスも無認証で sudo できるため、普段の chezmoi apply では使わず
+# Touch ID で都度認証する (run_onchange_before_install-packages.sh.tmpl 参照)。
+#
 # グローバル変数 $SUDO_KEEPALIVE_PID に PID を設定するので、呼び出し側は
 # 次のように trap でクリーンアップすること:
 #   trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true' EXIT

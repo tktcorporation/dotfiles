@@ -1,0 +1,44 @@
+#!/bin/bash
+{{ if eq .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+# sudo で Touch ID を使えるようにする (/etc/pam.d/sudo_local に pam_tid.so を追加)。
+#
+# 以前は setup.sh の中だけで設定していたため、setup.sh より前からある Mac には入らなかった。
+# apply 毎 (run_before) に「未設定のときだけ」書き込むので、設定済みなら sudo も呼ばない。
+# before にしているのは、後続の install-packages 等が出す sudo を Touch ID で通すため
+# (apply 中に sudo を保持し続ける keepalive をやめ、必要な時だけ認証する方針。
+#  bootstrap-lib.sh の start_sudo_keepalive 参照)。
+#
+# brew cask は cask 毎に sudo を発行するため、Touch ID 無効だと
+# install 中にパスワード入力が連発する (Brewfile に cask が 20+ ある現状は煩雑)。
+# macOS Sonoma 以降は /etc/pam.d/sudo_local が OS update でも保持される
+# 追加 PAM 設定として用意されており、pam_tid.so を有効化すれば
+# sudo が Touch ID を受け付ける。
+#
+# 安全性:
+#   - sufficient なので Touch ID 不在/失敗時は通常のパスワード認証に fallthrough
+#   - Touch ID 未登録 / 非対応ハード (Mac mini 等) でも害なし
+#   - sudo_local は OS update でリセットされる /etc/pam.d/sudo とは別ファイル
+# sudo_local は誰でも読める (0444) ので、判定には sudo を使わない (設定済みなら認証不要)。
+if [ -f /etc/pam.d/sudo_local.template ] && \
+   ! grep -q '^auth.*pam_tid\.so' /etc/pam.d/sudo_local 2>/dev/null; then
+    echo "==> Enabling Touch ID for sudo (/etc/pam.d/sudo_local)..."
+    # 既存ファイルがあれば中身を維持して append, なければ新規作成。
+    # sudo_local は local customization 用のファイルなので、
+    # ユーザーが他のルールを書いていた場合に破壊しないこと (Codex review PR #96)。
+    if [ -e /etc/pam.d/sudo_local ]; then
+        sudo tee -a /etc/pam.d/sudo_local >/dev/null <<'EOF'
+
+# Touch ID for sudo (added by tktcorporation/dotfiles)
+auth       sufficient     pam_tid.so
+EOF
+    else
+        sudo tee /etc/pam.d/sudo_local >/dev/null <<'EOF'
+# Managed by tktcorporation/dotfiles (chezmoi apply)
+# Touch ID を sudo で使えるようにする。失敗時はパスワード認証にフォールスルー。
+auth       sufficient     pam_tid.so
+EOF
+    fi
+fi
+{{ end -}}
