@@ -3,12 +3,21 @@ name: Validate
 on:
   pull_request:
 
+# ワークフロー全体の GITHUB_TOKEN を読み取り専用に絞る。
+# 検証しかしないので書き込み権限は不要で、Action やスクリプトが侵害された場合の被害を抑える。
+permissions:
+  contents: read
+
 jobs:
   brewfile:
     name: Validate Brewfile
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      # タグは付け替えられるためコミット SHA で固定する (更新は Dependabot)。
+      # persist-credentials: false で、後続ステップにトークンを残さない。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Update Homebrew
         # macos-latest ランナーの Homebrew はイメージビルド時点のタップスナップショットを
@@ -78,7 +87,11 @@ jobs:
     name: Validate chezmoi templates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # タグは付け替えられるためコミット SHA で固定する (更新は Dependabot)。
+      # persist-credentials: false で、後続ステップにトークンを残さない。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin

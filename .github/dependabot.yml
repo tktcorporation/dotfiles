@@ -1,0 +1,11 @@
+# GitHub Actions の SHA 固定を最新に追従させる。
+# cooldown: 公開直後のリリースは乗っ取り等の可能性があるため、1 日待ってから PR を作る
+# (README「サプライチェーン対策」の 12 時間方針に合わせる。Dependabot は日単位のみ指定可)。
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 1
