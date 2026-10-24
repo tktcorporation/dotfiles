@@ -30,6 +30,13 @@
 [core]
     excludesFile = ~/.gitignore_global
 
+{{- /* ghq.root は複数指定でき、最後の値が primary (ghq get の clone 先・ghq root の出力) になる。
+       新規は ~/ghq に置きつつ、旧ルート ~/src の既存リポジトリも ghq list で見えるよう両方登録する。 */}}
+
+[ghq]
+    root = ~/src
+    root = ~/ghq
+
 [alias]
     delete-merged-branch = "!f() { \
         protected_branches=\"master|development|develop|dev|trunk|main\"; \

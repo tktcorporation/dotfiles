@@ -32,9 +32,10 @@ alias cat="bat --plain"
 
 # ─── Functions ───
 function ghqcd() {
-  local selected_repo=$(ghq list | fzf --query="$1" --preview "ls -la $(ghq root)/{}")
+  # ghq.root が複数あるので、ghq root との連結ではなくフルパスで選ぶ
+  local selected_repo=$(ghq list -p | fzf --query="$1" --preview "ls -la {}")
   if [[ -n "$selected_repo" ]]; then
-    cd "$(ghq root)/$selected_repo"
+    cd "$selected_repo"
   fi
 }
 alias gcd="ghqcd"
