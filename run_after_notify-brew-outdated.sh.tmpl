@@ -1,0 +1,36 @@
+#!/bin/bash
+{{ if eq .chezmoi.os "darwin" -}}
+# Homebrew で更新できるパッケージを apply のたびに一覧表示する (通知のみ。自動では上げない)。
+#
+# なぜ必要か: brew bundle (install-packages) は Brewfile が変わった時しか走らないため、
+# 何もしないと formula は入れたまま古くなり、セキュリティ修正を取りこぼす。
+# なぜ自動 upgrade しないか: Homebrew には mise の minimum_release_age のような
+# 「公開から一定時間待つ」機能が無く、自動で上げると README「サプライチェーン対策」の
+# 12 時間方針の外で公開直後のバージョンを入れてしまう。更新するかは人が判断する。
+#
+# 自己更新する cask は HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1 で一覧から外れる
+# (ベンダーの updater に任せる方針。install-packages 参照)。
+# brew outdated は実行時に Homebrew の API データを取り直すので、別途 brew update は不要。
+set -uo pipefail
+
+# shellcheck source=scripts/bootstrap-lib.sh
+source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
+load_brew_shellenv
+
+command -v brew >/dev/null 2>&1 || exit 0
+
+export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
+OUTDATED="$(brew outdated --verbose 2>/dev/null | grep -v '^==>\|^✔' || true)"
+[ -z "$OUTDATED" ] && exit 0
+
+cat <<EOF
+
+==> [INFO] Homebrew に更新があります:
+$(printf '%s\n' "$OUTDATED" | sed 's/^/    /')
+
+    更新する場合: brew upgrade (個別なら brew upgrade <name>)
+    Homebrew には公開からの待ち時間を設ける仕組みが無いため、急ぎでなければ
+    リリースから少し時間が経ってから上げるのが安全です (README「サプライチェーン対策」)。
+
+EOF
+{{ end -}}
