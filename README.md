@@ -69,6 +69,7 @@ run_after_install-mas-apps.sh.tmpl           # apply 毎に未導入の Mac App 
 run_after_setup-clamav.sh.tmpl               # apply 毎に ClamAV 設定と初回定義 DB を用意 (揃っていれば何もしない)
 run_onchange_after_macos-defaults.sh.tmpl    # macOS のシステム設定 (設定内容が変わったときに再適用)
 run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導入し範囲内の最新へ追従
+run_after_notify-brew-outdated.sh.tmpl       # apply 毎に Homebrew の更新待ちを一覧表示 (自動では上げない)
 ```
 
 ## パッケージ管理
@@ -96,7 +97,7 @@ run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導
 
 npm / pnpm / uv はホームディレクトリにグローバル設定ファイルを増やさないよう, mise の `[env]` で環境変数として渡しています (mise 経由で動くシェル・shim・`mise exec` に効きます). bun だけは環境変数で設定できないため `~/.bunfig.toml` を使っています.
 
-Homebrew には同等の機能がありません. 自己更新する cask はベンダーの updater に任せており (上記「パッケージ管理」), formula は Homebrew の CI がビルドした bottle を使います.
+Homebrew には同等の機能がありません. そのため formula 等は自動では更新せず, apply のたびに更新待ちの一覧を表示するだけにしています (`run_after_notify-brew-outdated.sh.tmpl`). 上げるかどうかは表示を見て `brew upgrade` で判断します. 自己更新する cask はベンダーの updater に任せており (上記「パッケージ管理」), formula は Homebrew の CI がビルドした bottle を使います.
 
 ### 例外 (重要なセキュリティ修正をすぐ入れたいとき)
 
