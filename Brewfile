@@ -23,6 +23,11 @@ brew "mise"
 # ─── Development Tools ───
 brew "cocoapods"
 brew "fastlane"
+# GNU 版の基本コマンド (gtimeout 等)。macOS 標準の BSD 版に無い timeout を、
+# プロジェクトの mise タスクや Claude Code フックが「あれば使う」形で利用している。
+brew "coreutils"
+# シェルスクリプトの静的検査。scripts/check-templates.sh (push 前の検証) が使う。
+brew "shellcheck"
 
 # ─── Media & Utilities ───
 brew "ffmpeg"
