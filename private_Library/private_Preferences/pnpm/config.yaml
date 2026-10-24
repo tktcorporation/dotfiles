@@ -4,5 +4,7 @@
 # 乗っ取られたパッケージの悪性バージョンは公開後数時間で検知・取り下げられることが多いため、
 # その間は入れないようにする。方針と例外手順は README の「サプライチェーン対策」を参照。
 # 注意: `pnpm config set --global` はこのファイルを書き換えるため、chezmoi で差分が出る。
-#       グローバル設定を足すときは chezmoi 側 (Library/Preferences/pnpm/config.yaml) を編集すること。
+#       グローバル設定を足すときは chezmoi 側 (private_Library/private_Preferences/pnpm/config.yaml) を編集すること。
+# ディレクトリ名の private_ は ~/Library と ~/Library/Preferences を 0700 のまま保つため
+# (付けないと chezmoi apply で 0755 に緩められ、他ユーザーから読めるようになる)。
 minimumReleaseAge: 720

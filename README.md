@@ -85,7 +85,7 @@ run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導
 | ツール | 設定 (chezmoi 管理) | 一時的にクールダウンを外すコマンド |
 |---|---|---|
 | mise | `dot_config/mise/config.toml` の `minimum_release_age = "12h"` | `mise upgrade --minimum-release-age 0s <tool>` |
-| pnpm | `Library/Preferences/pnpm/config.yaml` の `minimumReleaseAge: 720` (分) | `pnpm add <pkg> --config.minimum-release-age=0` |
+| pnpm | `private_Library/private_Preferences/pnpm/config.yaml` の `minimumReleaseAge: 720` (分) | `pnpm add <pkg> --config.minimum-release-age=0` |
 | npm | `dot_zprofile.tmpl` の `npm_config_min_release_age=0.5` (日) | `npm install <pkg> --min-release-age=0` |
 | bun | `dot_bunfig.toml` の `minimumReleaseAge = 43200` (秒) | `bun add <pkg> --minimum-release-age=0` |
 | uv | `dot_config/uv/uv.toml` の `exclude-newer = "12 hours"` | `uv pip install <pkg> --exclude-newer "$(date -u +%Y-%m-%dT%H:%M:%SZ)"` |
