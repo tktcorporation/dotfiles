@@ -10,8 +10,8 @@ set -euo pipefail
 
 # mise の npm バックエンド (npm:@devcontainers/cli 等) が依存を解決するときにも
 # npm のクールダウン (README「サプライチェーン対策」) を効かせる。
-# ~/.zprofile にも同じ設定があるが、apply 中のプロセスには新しい .zprofile が
-# 読み込まれていない (初回 bootstrap / 既存シェルからの apply) ため、ここでも明示する。
+# 普段は mise の [env] (dot_config/mise/config.toml) から渡るが、mise install 中の
+# npm 実行に [env] が渡る保証がない (初回 bootstrap 時は mise 自体が未有効化) ため、ここでも明示する。
 export npm_config_min_release_age=0.5
 
 if command -v mise &>/dev/null; then

@@ -23,3 +23,14 @@ uv = "latest"
 # サプライチェーン攻撃対策のクールダウン: 公開から 12 時間未満のバージョンは install/upgrade しない。
 # 方針と例外手順は README の「サプライチェーン対策」を参照。
 minimum_release_age = "12h"
+
+[env]
+# パッケージマネージャ側のクールダウン (公開から 12 時間未満のバージョンは解決しない)。
+# ~/.npmrc や ~/Library/Preferences/pnpm/config.yaml 等のグローバル設定ファイルを
+# 増やさず、mise の中に閉じて一元管理するため環境変数で渡す
+# (mise activate / shim / mise exec のいずれの経路でも渡ることを確認済み)。
+# bun だけは環境変数で設定できないため ~/.bunfig.toml (dot_bunfig.toml) で設定している。
+# 方針と例外手順は README の「サプライチェーン対策」を参照。
+npm_config_min_release_age = "0.5"          # npm: 単位は日
+pnpm_config_minimum_release_age = "720"     # pnpm: 単位は分
+UV_EXCLUDE_NEWER = "12 hours"               # uv

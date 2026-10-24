@@ -85,10 +85,12 @@ run_after_upgrade-tools.sh.tmpl              # apply 毎に mise ツールを導
 | ツール | 設定 (chezmoi 管理) | 一時的にクールダウンを外すコマンド |
 |---|---|---|
 | mise | `dot_config/mise/config.toml` の `minimum_release_age = "12h"` | `mise upgrade --minimum-release-age 0s <tool>` |
-| pnpm | `Library/Preferences/pnpm/config.yaml` の `minimumReleaseAge: 720` (分) | `pnpm add <pkg> --config.minimum-release-age=0` |
-| npm | `dot_zprofile.tmpl` の `npm_config_min_release_age=0.5` (日) | `npm install <pkg> --min-release-age=0` |
+| pnpm | `dot_config/mise/config.toml` の `[env]` `pnpm_config_minimum_release_age = "720"` (分) | `pnpm add <pkg> --config.minimum-release-age=0` |
+| npm | `dot_config/mise/config.toml` の `[env]` `npm_config_min_release_age = "0.5"` (日) | `npm install <pkg> --min-release-age=0` |
 | bun | `dot_bunfig.toml` の `minimumReleaseAge = 43200` (秒) | `bun add <pkg> --minimum-release-age=0` |
-| uv | `dot_config/uv/uv.toml` の `exclude-newer = "12 hours"` | `uv pip install <pkg> --exclude-newer "$(date -u +%Y-%m-%dT%H:%M:%SZ)"` |
+| uv | `dot_config/mise/config.toml` の `[env]` `UV_EXCLUDE_NEWER = "12 hours"` | `uv pip install <pkg> --exclude-newer "$(date -u +%Y-%m-%dT%H:%M:%SZ)"` |
+
+npm / pnpm / uv はホームディレクトリにグローバル設定ファイルを増やさないよう, mise の `[env]` で環境変数として渡しています (mise 経由で動くシェル・shim・`mise exec` に効きます). bun だけは環境変数で設定できないため `~/.bunfig.toml` を使っています.
 
 Homebrew には同等の機能がありません. 自己更新する cask はベンダーの updater に任せており (上記「パッケージ管理」), formula は Homebrew の CI がビルドした bottle を使います.
 
