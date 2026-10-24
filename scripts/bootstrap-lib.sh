@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+# (source される前提のライブラリで shebang を持たないため、対象シェルを明示する)
 # setup.sh と run_onchange_before_install-packages.sh が共用する
 # ブートストラップ関数群。sudo keepalive、Homebrew インストール、
 # PATH 設定といった「セットアップ最初期の小道具」を SSOT で集約する。
@@ -34,6 +36,8 @@ start_sudo_keepalive() {
     SUDO_KEEPALIVE_PID=""
     if command -v sudo >/dev/null 2>&1 && sudo -v 2>/dev/null; then
         while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+        # 呼び出し側 (setup.sh) の trap で kill するためのグローバル変数。このファイル内では参照しない。
+        # shellcheck disable=SC2034
         SUDO_KEEPALIVE_PID=$!
     fi
 }
