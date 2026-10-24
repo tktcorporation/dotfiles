@@ -81,7 +81,7 @@ run_after_notify-brew-outdated.sh.tmpl       # apply 毎に Homebrew の更新�
 ## ランタイム管理
 
 [mise](https://mise.jdx.dev/) で node, python, bun, pnpm, uv 等を一元管理しています.
-`chezmoi apply` のたびに `mise install` と `mise upgrade` が走り, `dot_config/mise/config.toml` に書いた範囲 (`node = "lts"`, `pnpm = "11"` 等) の中で最新版へ追従します. 古いバージョンに固定したまま忘れてセキュリティ修正を取りこぼさないよう, 厳密なバージョン固定はしていません. メジャーを上げたいときは範囲自体を編集します.
+`chezmoi apply` のたびに `mise install` と `mise upgrade` が走り, `dot_config/mise/config.toml` に書いた範囲 (`node = "lts"`, `pnpm = "12"` 等) の中で最新版へ追従します. 古いバージョンに固定したまま忘れてセキュリティ修正を取りこぼさないよう, 厳密なバージョン固定はしていません. メジャーを上げたいときは範囲自体を編集します.
 
 ## サプライチェーン対策 (12 時間クールダウン)
 
