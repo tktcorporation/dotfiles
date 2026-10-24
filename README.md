@@ -18,8 +18,9 @@ Xcode Command Line Tools のインストール待ちから chezmoi の init/appl
 xcode-select --install
 # ダイアログで「インストール」→ 完了を待ってから次へ
 
-# 2. chezmoi で dotfiles をセットアップ
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
+# 2. Homebrew を入れ (https://brew.sh)、chezmoi で dotfiles をセットアップ
+brew install chezmoi
+chezmoi init --apply tktcorporation
 ```
 
 </details>
@@ -130,7 +131,6 @@ AI エージェントに作業させる場合も同じ手順で調べさせ, 根
 一見重複に見えるが、対象や実行タイミングが異なるため意図的に分けている設定. 統合すると差異吸収の抽象化が必要になり複雑さが増すため, あえて一本化しない.
 
 - **`.mise.toml`（リポジトリ自身の開発用） vs `dot_config/mise/config.toml`（配布先ユーザー環境用）**: 前者はこの dotfiles リポジトリ自体の開発・CI で使うランタイム設定（幅を持たせたバージョン指定）, 後者は `chezmoi apply` で `~/.config/mise/config.toml` に展開されるユーザー環境向け設定（メジャー等の範囲指定. apply 毎に範囲内の最新へ追従）. 対象読者が違う.
-- **`scripts/bootstrap-lib.sh` の二重取得経路**: `setup.sh` は `curl | bash` 実行時点でリポジトリが未クローンのためリモートから curl 取得し, `run_onchange_*.sh.tmpl` は chezmoi sourceDir から直接読む. 実行タイミングの制約による必然的な分岐で, リビジョンずれは `setup.sh` 側の関数存在チェックで検知する.
 - **`Brewfile`（macOS ローカル環境全体） vs `.devcontainer/devcontainer.json` の `onCreateCommand`（Linux コンテナ最小限）**: パッケージマネージャー（brew/apt）・対象環境・目的が異なる. パッケージ名も両者で一致するとは限らないため共有マニフェスト化しない.
 
 ## ローカル上書き
