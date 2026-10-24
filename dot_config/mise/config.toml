@@ -15,8 +15,8 @@ claude = "latest"
 "npm:@devcontainers/cli" = "latest"
 "npm:@antfu/ni" = "latest"
 bun = "1"
-pnpm = "11"
-python = "3.14"
+pnpm = "12"
+python = "3.15"
 uv = "latest"
 
 [settings]
