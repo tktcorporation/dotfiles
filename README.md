@@ -71,6 +71,8 @@ run_onchange_after_setup-tools.sh.tmpl       # mise config 変更時にランタ
 
 `Brewfile` を編集して `chezmoi apply` すると自動で `brew bundle` が走ります.
 
+自己更新機能を持つ cask (`auto_updates true`: Chrome, Slack, Cursor 等) は, brew では未インストール時の導入だけを行い, 更新は各アプリの updater に任せています (`HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1`). brew による upgrade はアプリ自身の updater と競合して失敗しやすく, 回避のためにターミナルへ App Management 権限を与えるのも権限が広すぎるためです. brew でまとめて更新したい場合は `brew upgrade --greedy` を使います.
+
 ## ランタイム管理
 
 [mise](https://mise.jdx.dev/) で node, python, bun, pnpm, uv 等を一元管理しています.

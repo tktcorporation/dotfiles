@@ -28,6 +28,18 @@ start_sudo_keepalive
 install_homebrew_if_missing
 load_brew_shellenv
 
+# ── 自己更新する cask は brew で upgrade しない ─────────────────
+# Homebrew は auto_updates true の cask でも、アプリ本体が tap より古いと
+# brew bundle で upgrade しに行くのがデフォルト。しかし Chrome 等は自前の
+# updater で root:wheel 所有に書き換えるため、brew の upgrade が
+# `chown: Operation not permitted` で失敗し、Caskroom に部分バックアップを
+# 残して次回以降も失敗し続ける。ターミナルに App Management 権限を
+# 付与すれば通るが、ターミナル配下の全プロセスに他アプリ改変権限が渡るため避ける。
+# 更新はベンダーの updater に任せ、brew は未インストール時の導入だけを担う。
+# ~/.zprofile (dot_zprofile.tmpl) にも同じ設定があるが、初回 bootstrap や
+# 非ログインシェルから apply された場合でも効くよう、ここでも明示する。
+export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
+
 # ── mas (Mac App Store) サインイン状態チェック ──────────────────
 # mas install は Apple ID 認証（sudo とは別）が必要。
 # 未サインインだと予期しないパスワードプロンプトが出るため、
