@@ -1,9 +1,11 @@
+{{- /* name/email/signingkey は手入力され得るので quote で "..." に包みエスケープする。
+       素のままだと # ; がコメント扱いになり、" \ を含むと構文エラーになるため。 */ -}}
 [user]
-    name = {{ .name }}
-    email = {{ .email }}
+    name = {{ .name | quote }}
+    email = {{ .email | quote }}
     useConfigOnly = true
 {{- if ne .signingkey "" }}
-    signingkey = {{ .signingkey }}
+    signingkey = {{ .signingkey | quote }}
 {{- end }}
 
 {{- if ne .signingkey "" }}
