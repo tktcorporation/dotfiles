@@ -45,6 +45,7 @@ if OS.mac?
 
   # ─── Browsers ───
   cask "arc"
+  cask "thebrowsercompany-dia"
   cask "google-chrome"
   # chromium は 2026-09-01 に Homebrew cask 側で disable 予定
   # (fails_gatekeeper_check)。宣言してもその後の brew bundle が
