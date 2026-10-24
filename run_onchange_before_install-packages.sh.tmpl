@@ -11,19 +11,16 @@ set -euo pipefail
 source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
 
 # ── クリーンアップ ──────────────────────────────────────────────
-# sudo keepalive プロセスと一時 Brewfile を一つの trap でまとめて掃除する。
 TMPBREWFILE=""
 cleanup() {
-    [ -n "${SUDO_KEEPALIVE_PID:-}" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
     [ -n "$TMPBREWFILE" ] && rm -f "$TMPBREWFILE"
 }
 trap cleanup EXIT
 
-# ── sudo keepalive ──────────────────────────────────────────────
-# setup.sh 経由ならここでは再認証プロンプトが出ない (credential が新鮮)。
-# chezmoi apply を手動実行する場合はここで初めてパスワードを聞かれる。
-echo "==> macOS のパスワードを入力してください（sudo 認証・この1回のみ）"
-start_sudo_keepalive
+# sudo keepalive はここでは使わない。apply 中ずっと sudo を有効にしておくと、
+# その間に動く cask の install スクリプト等も無認証で sudo できてしまうため。
+# sudo は brew が必要とした時だけ Touch ID (run_before_enable-touchid-sudo) で認証する。
+# setup.sh (初回 bootstrap) は無人で長時間走るため、そちらでは引き続き keepalive する。
 
 install_homebrew_if_missing
 load_brew_shellenv

@@ -29,6 +29,7 @@ chezmoi init --apply tktcorporation
 
 1. **chezmoi** インストール
 2. **Homebrew** インストール (未導入の場合)
+   - **sudo の Touch ID** 有効化 (`/etc/pam.d/sudo_local`。apply 中に sudo を保持し続けず, 必要な時だけ Touch ID で認証するため)
 3. **Brewfile** の全パッケージインストール (CLI ツール, cask アプリ, Mac App Store)
 4. **~/.gitconfig** 展開 (name/email/signing key をプロンプトで設定)
 5. **~/.gitignore_global** 展開
