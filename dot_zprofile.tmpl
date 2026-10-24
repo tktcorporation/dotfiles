@@ -9,5 +9,10 @@ eval "$(/usr/local/bin/brew shellenv)"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{- end }}
 
+# 自己更新する cask (Chrome, Slack 等) は手動の brew upgrade でも更新せず、
+# ベンダーの updater に任せる。理由は run_onchange_before_install-packages.sh.tmpl 参照。
+# brew でまとめて上げたいときは `brew upgrade --greedy` で上書きできる。
+export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
+
 # OrbStack shell integration (if installed)
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
