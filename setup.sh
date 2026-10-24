@@ -1,42 +1,136 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "==> dotfiles setup"
+# dotfiles の初回セットアップ。`bash <(curl -fsLS .../setup.sh)` で実行する。
+#
+# 2 段階で動く:
+#   stage 1 (curl で取得したこのファイル): Xcode CLT (git) を用意し、リポジトリを
+#            chezmoi の source dir に clone (既にあれば fast-forward pull) して、
+#            clone した側の setup.sh を exec する。
+#   stage 2 (clone したリポジトリ内の setup.sh): 同じリポジトリの
+#            scripts/bootstrap-lib.sh を読み込んで残りのセットアップを行う。
+#
+# なぜ 2 段階か: 以前は setup.sh と bootstrap-lib.sh を別々に main から curl していたため、
+# 取得の間に main が進むと別リビジョン同士を組み合わせて実行する恐れがあった
+# (関数の有無しか検査できず、実装の食い違いは検知できない)。stage 2 以降は
+# clone した 1 つのコミットだけを実行するので、この組み合わせ問題が起きない。
+# リモートから直接実行するのは stage 1 (このファイル) と Homebrew の公式 installer だけになる。
 
-# ── 共通 bootstrap ライブラリを取得 ─────────────────────────────
-# setup.sh は curl|bash で実行されるため、この時点でリポジトリは未クローン。
-# 共通関数 (sudo keepalive、Homebrew インストール、PATH 設定) を
-# リモートから取って source する。run_onchange スクリプトも同じファイルを
-# source するので SSOT が保たれる。
-BOOTSTRAP_LIB_URL="${BOOTSTRAP_LIB_URL:-https://raw.githubusercontent.com/tktcorporation/dotfiles/main/scripts/bootstrap-lib.sh}"
-BOOTSTRAP_LIB_TMP=$(mktemp)
-trap 'rm -f "$BOOTSTRAP_LIB_TMP"' EXIT
-if ! curl -fsSL "$BOOTSTRAP_LIB_URL" -o "$BOOTSTRAP_LIB_TMP"; then
-    echo "ERROR: Failed to fetch bootstrap library from $BOOTSTRAP_LIB_URL" >&2
-    exit 1
-fi
-# shellcheck source=/dev/null
-source "$BOOTSTRAP_LIB_TMP"
+DOTFILES_REPO_URL="https://github.com/tktcorporation/dotfiles.git"
+# XDG Base Directory Spec に従う: XDG_DATA_HOME が set なら $XDG_DATA_HOME/chezmoi。
+# chezmoi 本体も同じ規約で source dir を解決するため、ここを揃えないと
+# XDG_DATA_HOME を使っている環境で update が無効になる (Codex review PR #93)。
+CHEZMOI_SOURCE="${XDG_DATA_HOME:-${HOME}/.local/share}/chezmoi"
 
-# ライブラリが期待通り読めたかを検証する。
-# setup.sh と bootstrap-lib.sh は別々に curl で取得されるため、
-# 万が一両者のリビジョンがズレて関数が消えていた場合、ここで明確に止める。
-# (See PR #89 review: pin bootstrap-lib fetch to the same setup.sh revision)
-for fn in start_sudo_keepalive install_homebrew_if_missing load_brew_shellenv; do
-    if ! declare -F "$fn" >/dev/null; then
-        cat >&2 <<EOF
-ERROR: Bootstrap library is missing expected function: $fn
-       setup.sh と bootstrap-lib.sh のリビジョンがズレた可能性があります。
-       数秒待って再実行するか、BOOTSTRAP_LIB_URL を特定コミットに固定してください。
-       Source: $BOOTSTRAP_LIB_URL
-EOF
-        exit 1
+# ── Xcode Command Line Tools ────────────────────────────────────
+# git (リポジトリの clone に必要) を含むため、stage 1 の最初に用意する。
+ensure_xcode_clt() {
+    if ! xcode-select -p &>/dev/null; then
+        echo "==> Installing Xcode Command Line Tools..."
+
+        # softwareupdate を使い GUI ダイアログなしでインストールする。
+        # xcode-select --install は GUI 操作が必要なため、
+        # curl | bash のようなヘッドレス実行では完了できない。
+        # パターンは Homebrew の install.sh を参考にしている。
+        touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+        # softwareupdate の出力形式は macOS バージョンにより異なる:
+        #   旧: "* Command Line Tools (macOS Mojave version 10.14) for Xcode-10.2"
+        #   新: "* Label: Command Line Tools for Xcode-14.0"
+        # sort -V | tail -n1 で最新安定版を選択（head -n1 だとベータを拾う場合がある）。
+        CLT_LABEL=$(softwareupdate -l 2>/dev/null \
+            | grep -B 1 -E 'Command Line Tools' \
+            | awk -F'*' '/^ *\*/ {print $2}' \
+            | sed -e 's/^ *Label: //' -e 's/^ *//' \
+            | sort -V \
+            | tail -n1)
+
+        if [ -n "$CLT_LABEL" ]; then
+            echo "    Installing: $CLT_LABEL"
+            softwareupdate -i "$CLT_LABEL"
+        else
+            # softwareupdate でパッケージが見つからない場合、
+            # TTY 環境なら xcode-select --install にフォールバックする。
+            rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+            if [ -t 0 ]; then
+                echo "    softwareupdate にパッケージが見つかりません。GUI インストーラを起動します..."
+                xcode-select --install
+                echo "    GUI ダイアログに従ってインストールしてください。完了を待機中..."
+                until xcode-select -p &>/dev/null; do
+                    sleep 5
+                done
+            else
+                echo "ERROR: Xcode Command Line Tools package not found via softwareupdate." >&2
+                echo "       Please install manually: xcode-select --install" >&2
+                exit 1
+            fi
+        fi
+
+        rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+        # インストール先のパスを明示的に設定する
+        if [ -d /Library/Developer/CommandLineTools ]; then
+            sudo xcode-select --switch /Library/Developer/CommandLineTools
+        fi
+
+        if xcode-select -p &>/dev/null; then
+            echo "==> Xcode Command Line Tools installed."
+        else
+            echo "ERROR: Installation finished but xcode-select still not available." >&2
+            echo "       Please install manually: xcode-select --install" >&2
+            exit 1
+        fi
+    else
+        echo "==> Xcode Command Line Tools already installed."
     fi
-done
+}
+
+if [ "${DOTFILES_SETUP_STAGE:-1}" = "1" ]; then
+    echo "==> dotfiles setup"
+    ensure_xcode_clt
+
+    # ── 既存 chezmoi source の更新 ──────────────────────────────────
+    # `chezmoi init <repo>` は ~/.local/share/chezmoi が既に存在する場合に
+    # clone をスキップするが、pull は走らない。setup.sh を再実行した時に
+    # 古い source を使い続ける罠 (例: writeToStderr バグ修正後も古い template
+    # でコケ続ける) を避けるため、明示的に fast-forward pull する。
+    # 未マージのローカル変更や divergent branch がある場合は --ff-only が
+    # 失敗するので, 手元のカスタマイズを壊さない安全側に倒している。
+    # .git はディレクトリとは限らない (source が git worktree だと .git はファイル) ため、
+    # 存在チェックではなく git 自身にリポジトリかどうかを判定させる (Codex review)。
+    if git -C "$CHEZMOI_SOURCE" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "==> Updating existing chezmoi source ($CHEZMOI_SOURCE)..."
+        if ! git -C "$CHEZMOI_SOURCE" pull --ff-only; then
+            cat >&2 <<EOF
+
+==> WARNING: chezmoi source の fast-forward pull に失敗しました
+   $CHEZMOI_SOURCE にローカル変更や divergent commit がある可能性があります。
+   このまま chezmoi init --apply を続けると古いテンプレで処理される恐れがあります。
+
+   復旧手順 (どちらか):
+     A) ローカル変更を整理してから setup.sh を再実行:
+          cd "$CHEZMOI_SOURCE" && git status
+     B) ローカル変更が不要なら source を作り直して setup.sh を再実行:
+          rm -rf "$CHEZMOI_SOURCE"
+
+EOF
+            exit 1
+        fi
+    else
+        echo "==> Cloning dotfiles into $CHEZMOI_SOURCE..."
+        git clone "$DOTFILES_REPO_URL" "$CHEZMOI_SOURCE"
+    fi
+
+    DOTFILES_SETUP_STAGE=2 exec bash "$CHEZMOI_SOURCE/setup.sh" "$@"
+fi
+
+# ── stage 2: ここから下は clone したリポジトリのコミットで実行される ──
+# shellcheck source=scripts/bootstrap-lib.sh
+source "$CHEZMOI_SOURCE/scripts/bootstrap-lib.sh"
 
 # ── sudo keepalive ──────────────────────────────────────────────
 start_sudo_keepalive
-trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true; rm -f "$BOOTSTRAP_LIB_TMP"' EXIT
+trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true' EXIT
 
 # ── Touch ID for sudo ───────────────────────────────────────────
 # brew cask は cask 毎に sudo を発行するため、Touch ID 無効だと
@@ -70,66 +164,6 @@ EOF
     fi
 fi
 
-# ── Xcode Command Line Tools ────────────────────────────────────
-if ! xcode-select -p &>/dev/null; then
-    echo "==> Installing Xcode Command Line Tools..."
-
-    # softwareupdate を使い GUI ダイアログなしでインストールする。
-    # xcode-select --install は GUI 操作が必要なため、
-    # curl | bash のようなヘッドレス実行では完了できない。
-    # パターンは Homebrew の install.sh を参考にしている。
-    touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-
-    # softwareupdate の出力形式は macOS バージョンにより異なる:
-    #   旧: "* Command Line Tools (macOS Mojave version 10.14) for Xcode-10.2"
-    #   新: "* Label: Command Line Tools for Xcode-14.0"
-    # sort -V | tail -n1 で最新安定版を選択（head -n1 だとベータを拾う場合がある）。
-    CLT_LABEL=$(softwareupdate -l 2>/dev/null \
-        | grep -B 1 -E 'Command Line Tools' \
-        | awk -F'*' '/^ *\*/ {print $2}' \
-        | sed -e 's/^ *Label: //' -e 's/^ *//' \
-        | sort -V \
-        | tail -n1)
-
-    if [ -n "$CLT_LABEL" ]; then
-        echo "    Installing: $CLT_LABEL"
-        softwareupdate -i "$CLT_LABEL"
-    else
-        # softwareupdate でパッケージが見つからない場合、
-        # TTY 環境なら xcode-select --install にフォールバックする。
-        rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-        if [ -t 0 ]; then
-            echo "    softwareupdate にパッケージが見つかりません。GUI インストーラを起動します..."
-            xcode-select --install
-            echo "    GUI ダイアログに従ってインストールしてください。完了を待機中..."
-            until xcode-select -p &>/dev/null; do
-                sleep 5
-            done
-        else
-            echo "ERROR: Xcode Command Line Tools package not found via softwareupdate." >&2
-            echo "       Please install manually: xcode-select --install" >&2
-            exit 1
-        fi
-    fi
-
-    rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-
-    # インストール先のパスを明示的に設定する
-    if [ -d /Library/Developer/CommandLineTools ]; then
-        sudo xcode-select --switch /Library/Developer/CommandLineTools
-    fi
-
-    if xcode-select -p &>/dev/null; then
-        echo "==> Xcode Command Line Tools installed."
-    else
-        echo "ERROR: Installation finished but xcode-select still not available." >&2
-        echo "       Please install manually: xcode-select --install" >&2
-        exit 1
-    fi
-else
-    echo "==> Xcode Command Line Tools already installed."
-fi
-
 # ── 1Password bootstrap ─────────────────────────────────────────
 # .chezmoi.yaml.tmpl と dot_gitconfig.tmpl が 1Password に依存しているため、
 # chezmoi が走る前にここで最小限の bootstrap を済ませる:
@@ -145,6 +179,14 @@ fi
 
 install_homebrew_if_missing
 load_brew_shellenv
+
+# chezmoi も Homebrew から入れる。以前は get.chezmoi.io のインストーラを
+# curl | sh していたが、Homebrew を既に信頼している以上、取得元を増やす理由がない。
+# (Brewfile にも chezmoi があるので後段の brew bundle では no-op になる)
+if ! command -v chezmoi >/dev/null 2>&1; then
+    echo "==> Installing chezmoi..."
+    brew install chezmoi
+fi
 
 # 1Password アプリ (GUI): 既存の /Applications/1Password.app を尊重。
 # Mac App Store や公式 DMG で入れた場合と衝突しないよう、ディレクトリの
@@ -193,38 +235,8 @@ EOF
     exit 1
 fi
 
-# ── 既存 chezmoi source の更新 ──────────────────────────────────
-# `chezmoi init <repo>` は ~/.local/share/chezmoi が既に存在する場合に
-# clone をスキップするが、pull は走らない。setup.sh を再実行した時に
-# 古い source を使い続ける罠 (例: writeToStderr バグ修正後も古い template
-# でコケ続ける) を避けるため、明示的に fast-forward pull する。
-# 未マージのローカル変更や divergent branch がある場合は --ff-only が
-# 失敗するので, 手元のカスタマイズを壊さない安全側に倒している。
-# XDG Base Directory Spec に従う: XDG_DATA_HOME が set なら $XDG_DATA_HOME/chezmoi。
-# chezmoi 本体も同じ規約で source dir を解決するため、ここを揃えないと
-# XDG_DATA_HOME を使っている環境で update が無効になる (Codex review PR #93)。
-CHEZMOI_SOURCE="${XDG_DATA_HOME:-${HOME}/.local/share}/chezmoi"
-if [ -d "$CHEZMOI_SOURCE/.git" ]; then
-    echo "==> Updating existing chezmoi source ($CHEZMOI_SOURCE)..."
-    if ! git -C "$CHEZMOI_SOURCE" pull --ff-only; then
-        cat >&2 <<EOF
-
-==> WARNING: chezmoi source の fast-forward pull に失敗しました
-   $CHEZMOI_SOURCE にローカル変更や divergent commit がある可能性があります。
-   このまま chezmoi init --apply を続けると古いテンプレで処理される恐れがあります。
-
-   復旧手順 (どちらか):
-     A) ローカル変更を整理してから setup.sh を再実行:
-          cd "$CHEZMOI_SOURCE" && git status
-     B) ローカル変更が不要なら source を作り直して setup.sh を再実行:
-          rm -rf "$CHEZMOI_SOURCE"
-
-EOF
-        exit 1
-    fi
-fi
-
 # ── chezmoi init & apply ────────────────────────────────────────
-echo "==> Installing chezmoi and applying dotfiles..."
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply tktcorporation
-
+# source dir は stage 1 で用意済みなので、リポジトリ指定なしで init する
+# (既存 source を使い、設定ファイル生成と apply だけを行う)。
+echo "==> Applying dotfiles..."
+chezmoi init --apply

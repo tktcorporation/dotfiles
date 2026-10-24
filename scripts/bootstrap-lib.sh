@@ -2,25 +2,19 @@
 # ブートストラップ関数群。sudo keepalive、Homebrew インストール、
 # PATH 設定といった「セットアップ最初期の小道具」を SSOT で集約する。
 #
-# 読み込み方:
+# 読み込み方 (どちらも chezmoi の source dir にあるこのファイルを直接読む):
 #
-#   setup.sh 側 (curl|bash でリポジトリが未クローンの段階):
-#     LIB_URL="https://raw.githubusercontent.com/tktcorporation/dotfiles/main/scripts/bootstrap-lib.sh"
-#     LIB_TMP=$(mktemp)
-#     curl -fsSL "$LIB_URL" -o "$LIB_TMP"
-#     # shellcheck source=/dev/null
-#     source "$LIB_TMP" && rm -f "$LIB_TMP"
+#   setup.sh 側 (stage 2。stage 1 でリポジトリを clone した後に exec される):
+#     source "$CHEZMOI_SOURCE/scripts/bootstrap-lib.sh"
 #
-#   run_onchange_*.sh.tmpl 側 (chezmoi sourceDir が既にある):
+#   run_*.sh.tmpl 側:
 #     source "{{ joinPath .chezmoi.sourceDir "scripts" "bootstrap-lib.sh" }}"
+#
+# 以前は setup.sh がこのファイルを main から別途 curl していたが、setup.sh と
+# 別リビジョンになり得たため、clone 済みのものを読む形に統一した (setup.sh 冒頭参照)。
 #
 # 注意: このファイル自体はシェルスクリプトとして `bash -n` で構文検査可能だが
 # 単体で実行するものではない。関数定義しか含まないので source されて使われる。
-#
-# なぜ取得経路が2つあるのか: setup.sh 実行時点ではリポジトリが未クローンなので
-# リモートから curl するしかなく、run_onchange 側は chezmoi sourceDir が既にローカルに
-# あるので直接読む。実行タイミングの制約による意図的な分離であり、1つの読み込み方法には
-# 統合できない。リビジョンずれのリスクは setup.sh 側の関数存在チェックで検知する。
 
 # sudo を事前認証してバックグラウンドで維持する。
 # セットアップ中に複数の sudo コマンドが走ってもパスワード入力を
