@@ -128,6 +128,14 @@ AI エージェントに作業させる場合も同じ手順で調べさせ, 根
 
 > 注意: Karabiner GUI で設定を変更すると `karabiner.json` が書き換わり chezmoi 差分が出ます. その場合は `chezmoi re-add ~/.config/karabiner/karabiner.json` で取り込むか, `chezmoi apply` で管理状態へ戻してください.
 
+## 開発
+
+テンプレートや `run_*` スクリプトを変更したら, push 前に CI と同じ検証をローカルで実行します (macOS で実行すること. darwin 向けの中身はそれ以外の OS だと空に展開されて検証されません).
+
+```bash
+bash scripts/check-templates.sh   # 全 .tmpl を展開し, シェルスクリプトに bash -n / shellcheck
+```
+
 ## 設計上あえて分離しているもの
 
 一見重複に見えるが、対象や実行タイミングが異なるため意図的に分けている設定. 統合すると差異吸収の抽象化が必要になり複雑さが増すため, あえて一本化しない.

@@ -85,7 +85,9 @@ jobs:
 
   chezmoi:
     name: Validate chezmoi templates
-    runs-on: ubuntu-latest
+    # macOS 向けスクリプトは `{{ if eq .chezmoi.os "darwin" }}` で囲っているため、
+    # Linux で展開すると空になり中身が検証されない。実機と同じ macOS で展開・検査する。
+    runs-on: macos-latest
     steps:
       # タグは付け替えられるためコミット SHA で固定する (更新は Dependabot)。
       # persist-credentials: false で、後続ステップにトークンを残さない。
@@ -93,49 +95,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install chezmoi
-        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+      - name: Install chezmoi and shellcheck
+        # 以前は get.chezmoi.io のインストーラを curl | sh していたが、setup.sh と同じく Homebrew から入れる。
+        run: brew install chezmoi shellcheck
 
-      - name: Validate templates (syntax check)
-        run: |
-          # Basic Go template syntax validation: 開閉ペアの数だけを見る軽量チェック。
-          # 下の execute-template でも実質的にカバーされるが、こちらは chezmoi が
-          # 動かない状況でも単独で機能するので残している。
-          errors=0
-          for f in $(find . -name '*.tmpl' -not -path './.git/*'); do
-            open_count=$(grep -o '{{' "$f" | wc -l | tr -d ' ')
-            close_count=$(grep -o '}}' "$f" | wc -l | tr -d ' ')
-            if [ "$open_count" != "$close_count" ]; then
-              echo "::error::Unmatched template delimiters in $f ({{ count: $open_count, }} count: $close_count)"
-              errors=$((errors + 1))
-            fi
-          done
-
-          if [ "$errors" -gt 0 ]; then
-            echo "::error::$errors template(s) have delimiter mismatch"
-            exit 1
-          fi
-          echo "All templates have balanced delimiters"
-
-      - name: Validate template execution (detect undefined chezmoi functions)
-        run: |
-          # text/template は関数の存在をパース時に解決するため、未到達ブランチに
-          # 紛れ込んだ未定義関数 (例: かつての writeToStderr) もここで弾ける。
-          # `output` 内で op CLI を呼ぶ箇所は CI 環境では失敗するが、それは
-          # `fail` 等で正常に拾われるエラーで CI fail の対象ではない。
-          # ここでは "function ... not defined" だけを拾って失敗扱いにする。
-          errors=0
-          for f in $(find . -name '*.tmpl' -not -path './.git/*'); do
-            out=$(chezmoi execute-template --init < "$f" 2>&1 || true)
-            if echo "$out" | grep -qE 'function "[^"]+" not defined'; then
-              echo "::error::$f references an undefined chezmoi template function:"
-              echo "$out" | sed 's/^/  /' | head -5
-              errors=$((errors + 1))
-            fi
-          done
-
-          if [ "$errors" -gt 0 ]; then
-            echo "::error::$errors template(s) reference undefined functions"
-            exit 1
-          fi
-          echo "All templates use only known chezmoi functions"
+      - name: Render and lint templates
+        # 全テンプレートをテスト用データで展開し、展開後のシェルスクリプトに bash -n / shellcheck をかける。
+        # ローカルでも同じコマンドで検証できる (scripts/check-templates.sh 冒頭参照)。
+        run: bash scripts/check-templates.sh
