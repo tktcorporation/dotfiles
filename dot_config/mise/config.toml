@@ -12,6 +12,7 @@ node = "lts"
 # aqua:anthropics/claude-code で GitHub Releases の単体バイナリを取得)。
 # Anthropic が npm 配布より native install を推奨しており、Node のバージョンにも依存しないため。
 claude = "latest"
+"npm:@openai/codex" = "latest"
 "npm:@devcontainers/cli" = "latest"
 "npm:@antfu/ni" = "latest"
 bun = "1"
