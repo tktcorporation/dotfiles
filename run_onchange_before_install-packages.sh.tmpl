@@ -48,6 +48,17 @@ BREWFILE={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
 TMPBREWFILE=$(mktemp)
 grep -v '^[[:space:]]*mas ' "$BREWFILE" > "$TMPBREWFILE"
 
+# 古い brew 本体が新しい cask 定義（例: Inkscape の command_wrapper）を
+# 読むと、個別のインストールに入る前に bundle 全体が止まる。
+# bundle の自動更新は環境変数や更新間隔に左右されるため、パッケージを
+# 適用するときだけ本体と定義を明示的に更新する。既存パッケージの
+# upgrade や削除を追加するものではない。
+echo "Updating Homebrew before brew bundle..."
+if ! brew update; then
+    printf '%s\n' 'ERROR: brew update failed. Resolve the error above, then rerun dotfiles setup.' >&2
+    exit 1
+fi
+
 echo "Running brew bundle..."
 brew bundle --file="$TMPBREWFILE"
 CLEANUP_BREWFILE="$TMPBREWFILE"
